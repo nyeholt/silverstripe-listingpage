@@ -35,6 +35,7 @@ class ListingPage extends Page
 		'CustomSort' => 'Varchar(64)',
 		'SortDir' => "Enum('Ascending,Descending')",
 		'ListType' => 'Varchar(64)',
+		'Depth' => 'Int',
 	);
 
 	public static $has_one = array(
@@ -52,10 +53,10 @@ class ListingPage extends Page
 		$fields->removeFieldFromTab('Root.Content.Main', 'Content');
 
 		$fields->addFieldToTab('Root.Content.Main', new TextAreaField('Content', _t('ListingPage.CONTENT_TEMPLATE', 'Content Template'), 10));
-
 		$fields->addFieldToTab('Root.Content.Main', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
-
 		$fields->addFieldToTab('Root.Content.Main', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
+
+		$fields->addFieldToTab('Root.Content.Main', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		$objFields = singleton($listType)->inheritedDatabaseFields();
@@ -76,7 +77,7 @@ class ListingPage extends Page
 		return $fields;
 	}
 
-	public function Content()
+	public function ListingItems()
 	{
 		// need to get the items being listed
 		$source = $this->ListingSource();
@@ -87,7 +88,10 @@ class ListingPage extends Page
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 
-		$filter = db_quote(array('ParentID =' => $source->ID));
+		$ids = $this->getIdsFrom($source, 1);
+		$ids[] = $source->ID;
+
+		$filter = db_quote(array('ParentID IN ' => $ids));
 		$sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
 		$sort = $this->SortBy ? $this->SortBy : 'Title';
 		// $sort = $this->CustomSort ? $this->CustomSort : $sort;
@@ -107,20 +111,38 @@ class ListingPage extends Page
 //		$items->setPageLength($this->PerPage);
 		$items->setPaginationGetVar($pageUrlVar);
 
-		// iterate and apply the template to them
-		$itemsContent = '';
+		return $items;
+	}
 
+	/**
+	 * Recursively find all the child items that need to be listed
+	 *
+	 * @param DataObject $parent
+	 * @param int $depth
+	 */
+	protected function getIdsFrom($parent, $depth)
+	{
+		if ($depth >= $this->Depth) {
+			return;
+		}
+		$ids = array();
+		foreach ($parent->Children() as $kid) {
+			$ids[] = $kid->ID;
+			$childIds = $this->getIdsFrom($kid, $depth + 1);
+			if ($childIds) {
+				$ids = array_merge($ids, $childIds);
+			}
+		}
+
+		return $ids;
+	}
+
+	public function Content()
+	{
+		$items = $this->ListingItems();
 		$item = $this->customise(array('Items' => $items));
-		
-		$itemStack = array();
-		$val = "";
-
-		$content = SSViewer::parseTemplateContent($this->Content, 'ListingItem-'.$this->ID.'-'.$item->ID);
-		$content = substr($content, 5);
-
-		eval($content);
-
-		return $val;
+		$view = SSViewer::fromString($this->Content);
+		return $view->process($item);
 	}
 }
 
