@@ -36,6 +36,7 @@ class ListingPage extends Page
 		'SortDir' => "Enum('Ascending,Descending')",
 		'ListType' => 'Varchar(64)',
 		'Depth' => 'Int',
+		'ClearSource' => 'Boolean',
 	);
 
 	public static $has_one = array(
@@ -73,10 +74,30 @@ class ListingPage extends Page
 		$fields->addFieldToTab('Root.Content.Main', $optionsetField);
 
 		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), 'Page'));
+		$fields->addFieldToTab('Root.Content.Main', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 
 		return $fields;
 	}
 
+	/**
+	 * When saving, check to see whether we should delete the
+	 * listing source ID
+	 */
+	public function onBeforeWrite()
+	{
+		parent::onBeforeWrite();
+
+		if ($this->ClearSource) {
+			$this->ClearSource = false;
+			$this->ListingSourceID = 0;
+		}
+	}
+
+	/**
+	 * Retrieves all the listing items within this source
+	 *
+	 * @return DataObjectSource
+	 */
 	public function ListingItems()
 	{
 		// need to get the items being listed
