@@ -28,7 +28,7 @@ OF SUCH DAMAGE.
 class ListingPage extends Page
 {
     public static $db = array(
-		'ItemTemplate' => 'HTMLText',
+		'ItemTemplate' => 'Text',
 		'PerPage' => 'Int',
 		'Style' => "Enum('Standard,A to Z')",
 		'SortBy' => "Varchar(64)",
@@ -53,7 +53,7 @@ class ListingPage extends Page
 
 		$fields->removeFieldFromTab('Root.Content.Main', 'Content');
 
-		$fields->addFieldToTab('Root.Content.Main', new TextAreaField('Content', _t('ListingPage.CONTENT_TEMPLATE', 'Content Template'), 10));
+		$fields->addFieldToTab('Root.Content.Main', new TextAreaField('ItemTemplate', _t('ListingPage.CONTENT_TEMPLATE', 'Content Template'), 10));
 		$fields->addFieldToTab('Root.Content.Main', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
 		$fields->addFieldToTab('Root.Content.Main', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
 
@@ -129,8 +129,10 @@ class ListingPage extends Page
 
 		$items = DataObject::get($listType, $filter, $sort, '', $limit);
 		/* @var $items DataObjectSet */
-//		$items->setPageLength($this->PerPage);
-		$items->setPaginationGetVar($pageUrlVar);
+
+		if ($items) {
+			$items->setPaginationGetVar($pageUrlVar);
+		}
 
 		return $items;
 	}
@@ -162,7 +164,7 @@ class ListingPage extends Page
 	{
 		$items = $this->ListingItems();
 		$item = $this->customise(array('Items' => $items));
-		$view = SSViewer::fromString($this->Content);
+		$view = SSViewer::fromString($this->ItemTemplate);
 		return $view->process($item);
 	}
 }
