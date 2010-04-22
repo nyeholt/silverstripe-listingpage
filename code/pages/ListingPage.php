@@ -21,7 +21,7 @@ OF SUCH DAMAGE.
 */
 
 /**
- * 
+ * A page that can be configured to create listings of other content
  *
  * @author Marcus Nyeholt <marcus@silverstripe.com.au>
  */
@@ -131,6 +131,11 @@ class ListingPage extends Page
 		/* @var $items DataObjectSet */
 
 		if ($items) {
+			foreach($items as $result) {
+				if(!$result->canView()) {
+					$items->remove($result);
+				}
+			}
 			$items->setPaginationGetVar($pageUrlVar);
 		}
 
