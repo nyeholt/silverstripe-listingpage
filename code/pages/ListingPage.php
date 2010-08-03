@@ -25,8 +25,7 @@ OF SUCH DAMAGE.
  *
  * @author Marcus Nyeholt <marcus@silverstripe.com.au>
  */
-class ListingPage extends Page
-{
+class ListingPage extends Page {
     public static $db = array(
 		'ItemTemplate' => 'Text',
 		'PerPage' => 'Int',
@@ -37,6 +36,7 @@ class ListingPage extends Page
 		'ListType' => 'Varchar(64)',
 		'Depth' => 'Int',
 		'ClearSource' => 'Boolean',
+		'StrictType' => 'Boolean',
 	);
 
 	public static $has_one = array(
@@ -72,6 +72,8 @@ class ListingPage extends Page
 		asort($source);
 		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List pages of type'), $source, 'Any');
 		$fields->addFieldToTab('Root.Content.Main', $optionsetField);
+
+		$fields->addFieldToTab('Root.Content.Main', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
 
 		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), 'Page'));
 		$fields->addFieldToTab('Root.Content.Main', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
@@ -112,7 +114,15 @@ class ListingPage extends Page
 		$ids = $this->getIdsFrom($source, 1);
 		$ids[] = $source->ID;
 
-		$filter = db_quote(array('ParentID IN ' => $ids));
+		$filter = array(
+			'ParentID IN ' => $ids,
+		);
+
+		if ($this->StrictType) {
+			$filter['ClassName ='] = $listType;
+		}
+
+		$filter = singleton('ListingPageUtils')->dbQuote($filter);
 		$sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
 		$sort = $this->SortBy ? $this->SortBy : 'Title';
 		// $sort = $this->CustomSort ? $this->CustomSort : $sort;
