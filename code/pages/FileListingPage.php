@@ -42,23 +42,17 @@ class FileListingPage extends ListingPage {
 		$fields = parent::getCMSFields();
 		/* @var FieldSet $fields */
 
-		$source = array(
-			'Image' => 'Image',
-			'File' => 'File',
-			'Folder' => 'Folder',
-		);
+		$classes = ClassInfo::subclassesFor('File');
+		if (count($classes)) {
+			unset($classes[0]);
+			$classes['File'] = 'File';
+			asort($classes);
+		}
 
-		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List pages of type'), $source, 'Any');
+		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List pages of type'), $classes, 'Any');
 		$fields->replaceField('ListType', $optionsetField);
 		
-
-//		$fields->removeFieldFromTab('Root.Content.Main', 'ListingSourceID');
-//		$fields->addFieldToTab('Root.Content.Main', new TreeDropdownField('FileListingSourceID', _t('ListingPage.FILE_LISTING_SOURCE', 'Source of files for listing'), 'File'));
 		$fields->replaceField('ListingSourceID', new TreeDropdownField('FileListingSourceID', _t('ListingPage.FILE_LISTING_SOURCE', 'Source of files for listing'), 'File'));
-
-		// remove and re-add to make sure it's in a contextually correct spot
-//		$fields->removeFieldFromTab('Root.Content.Main', 'ClearSource');
-//		$fields->addFieldToTab('Root.Content.Main', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 
 		return $fields;
 	}
