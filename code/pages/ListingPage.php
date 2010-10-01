@@ -60,9 +60,7 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.Main', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
-		$objFields = singleton($listType)->inheritedDatabaseFields();
-		$objFields = array_keys($objFields);
-		$objFields = array_combine($objFields, $objFields);
+		$objFields = $this->getSelectableFields($listType);
 
 		$fields->addFieldToTab('Root.Content.Main', new DropdownField('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
 		// $fields->addFieldToTab('Root.Content.Main', new TextField('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
@@ -79,6 +77,18 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.Main', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 
 		return $fields;
+	}
+
+	protected function getSelectableFields($listType) {
+		$objFields = singleton($listType)->inheritedDatabaseFields();
+		$objFields = array_keys($objFields);
+		$objFields = array_combine($objFields, $objFields);
+		$objFields['LastEdited'] = 'LastEdited';
+		$objFields['Created'] = 'Created';
+		$objFields['ID'] = 'ID';
+
+		ksort($objFields);
+		return $objFields;
 	}
 
 	/**
@@ -122,9 +132,11 @@ class ListingPage extends Page {
 			$filter['ClassName ='] = $listType;
 		}
 
+		$objFields = $this->getSelectableFields($listType);
+
 		$filter = singleton('ListingPageUtils')->dbQuote($filter);
 		$sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
-		$sort = $this->SortBy ? $this->SortBy : 'Title';
+		$sort = $this->SortBy && isset($objFields[$this->SortBy]) ? $this->SortBy : 'Title';
 		// $sort = $this->CustomSort ? $this->CustomSort : $sort;
 		$sort .= ' '.$sortDir;
 
