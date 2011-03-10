@@ -1,0 +1,6 @@
+
+2011-03-10 v0.2.0
+-----------------
+
+* Split the template definition off into a separate section for security and
+  reusability reasons. 
