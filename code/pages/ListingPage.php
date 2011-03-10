@@ -14,6 +14,7 @@ class ListingPage extends Page {
 		'CustomSort'				=> 'Varchar(64)',
 		'SortDir'					=> "Enum('Ascending,Descending')",
 		'ListType'					=> 'Varchar(64)',
+		'ListingSourceID'			=> 'Int',
 		'Depth'						=> 'Int',
 		'ClearSource'				=> 'Boolean',
 		'StrictType'				=> 'Boolean',
@@ -21,7 +22,7 @@ class ListingPage extends Page {
 	
 	public static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
-		'ListingSource'				=> 'Page',
+//		'ListingSource'				=> 'Page',
 	);
 
 	/**
@@ -44,7 +45,7 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.ListingSettings', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
 		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
 
-		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
+		
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		$objFields = $this->getSelectableFields($listType);
@@ -52,15 +53,20 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
 		// $fields->addFieldToTab('Root.Content.Main', new TextField('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
 
-		$types = SiteTree::page_type_classes();
+		$types = ClassInfo::subclassesFor('DataObject');
+		array_shift($types);
 		$source = array_combine($types, $types);
 		asort($source);
-		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List pages of type'), $source, 'Any');
-		$fields->addFieldToTab('Root.Content.ListingSettings', $optionsetField);
 
+		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List items of type'), $source, 'Any');
+		$fields->addFieldToTab('Root.Content.ListingSettings', $optionsetField);
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
 
-		$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), 'Page'));
+		if ($this->ListType && Object::has_extension($this->ListType, 'Hierarchy')) {
+			$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
+			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $this->ListType));
+		}
+
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 
 		return $fields;
@@ -96,7 +102,9 @@ class ListingPage extends Page {
 	 * @return DataObject
 	 */
 	protected function getListingSource() {
-		return $this->ListingSource();
+		if ($this->ListType && $this->ListingSourceID) {
+			return DataObject::get_by_id($this->ListType, $this->ListingSourceID);
+		}
 	}
 
 	/**
