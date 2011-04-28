@@ -24,6 +24,16 @@ class ListingPage extends Page {
 		'ListingTemplate'			=> 'ListingTemplate',
 //		'ListingSource'				=> 'Page',
 	);
+	
+	/**
+	 * A mapping between ListType selected and the type of items that should be shown in the "Source" 
+	 * selection tree. If not specified in this mapping, it is assumed to be 'Page'.
+	 *
+	 * @var array
+	 */
+	public static $listing_type_source_map = array(
+		'Folder'	=> 'Folder'
+	);
 
 	/**
 	 * @return FieldSet
@@ -63,8 +73,9 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
 
 		if ($this->ListType && Object::has_extension($this->ListType, 'Hierarchy')) {
+			$listType = isset(self::$listing_type_source_map[$listType]) ? self::$listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
 			$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
-			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $this->ListType));
+			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $listType));
 		}
 
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
