@@ -201,8 +201,7 @@ class ListingPage extends Page {
 		$items = $this->ListingItems();
 		$item = $this->customise(array('Items' => $items));
 		$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
-		$content = $this->Content;
-		
+		$content = str_replace('<p>$Listing</p>', '$Listing', $this->Content);
 		return str_replace('$Listing', $view->process($item), $content);
 	}
 
