@@ -22,7 +22,6 @@ class ListingPage extends Page {
 	
 	public static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
-//		'ListingSource'				=> 'Page',
 	);
 	
 	/**
@@ -34,6 +33,8 @@ class ListingPage extends Page {
 	public static $listing_type_source_map = array(
 		'Folder'	=> 'Folder'
 	);
+
+	public static $icon = 'listingpage/images/listing-page';
 
 	/**
 	 * @return FieldSet
@@ -50,12 +51,10 @@ class ListingPage extends Page {
 		} else {
 			$templates = array();
 		}
-		
+
 		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('ListingTemplateID', _t('ListingPage.CONTENT_TEMPLATE', 'Listing Template'), $templates));
 		$fields->addFieldToTab('Root.Content.ListingSettings', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
 		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
-
-		
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		$objFields = $this->getSelectableFields($listType);
