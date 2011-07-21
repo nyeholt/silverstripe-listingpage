@@ -61,6 +61,10 @@ class SortableChildrenExtension extends DataObjectDecorator {
 		$sort[1] = strtolower($sort[1]) == 'asc' ? 'ASC' : 'DESC';
 		$sort = $sort[0] . ' ' . $sort[1];
 		
+		if (strlen($extraFilter)) {
+			$extraFilter = ' AND ' . $extraFilter;
+		}
+
 		$staged = DataObject::get($baseClass, "\"{$baseClass}\".\"ParentID\" = " 
 			. (int)$this->owner->ID . " AND \"{$baseClass}\".\"ID\" != " . (int)$this->owner->ID
 			. $extraFilter, $sort);
