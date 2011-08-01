@@ -18,12 +18,15 @@ class ListingPage extends Page {
 		'Depth'						=> 'Int',
 		'ClearSource'				=> 'Boolean',
 		'StrictType'				=> 'Boolean',
+		
+		'ContentType'				=> 'Varchar',
+		'CustomContentType'			=> 'Varchar',
 	);
-	
+
 	public static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
 	);
-	
+
 	/**
 	 * A mapping between ListType selected and the type of items that should be shown in the "Source" 
 	 * selection tree. If not specified in this mapping, it is assumed to be 'Page'.
@@ -78,6 +81,17 @@ class ListingPage extends Page {
 		}
 
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
+
+		$contentTypes = array(
+			''						=> 'In Theme',
+			'text/html'				=> 'HTML Fragment',
+			'text/xml'				=> 'XML',
+			'application/rss+xml'	=> 'RSS (xml)',
+			'application/rdf+xml'	=> 'RDF (xml)',
+			'application/atom+xml'	=> 'ATOM (xml)',
+		);
+		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
+		$fields->addFieldToTab('Root.Content.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
 
 		return $fields;
 	}
@@ -203,9 +217,18 @@ class ListingPage extends Page {
 		$content = str_replace('<p>$Listing</p>', '$Listing', $this->Content);
 		return str_replace('$Listing', $view->process($item), $content);
 	}
-
 }
 
 class ListingPage_Controller extends Page_Controller {
-	
+	public function index() {
+		if (($this->data()->ContentType || $this->data()->CustomContentType)) {
+			// k, not doing it in the theme...
+			$contentType = $this->data()->ContentType ? $this->data()->ContentType : $this->data()->CustomContentType;
+			$this->response->addHeader('Content-type', $contentType);
+			
+			return $this->data()->Content();
+		}
+		
+		return $this->renderWith(array('ListingPage', 'Page'));
+	}
 }
