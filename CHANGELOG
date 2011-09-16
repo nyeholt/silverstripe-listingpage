@@ -1,3 +1,9 @@
+2011-09-16 v0.2.5
+-----------------
+
+* Removed restrictions that meant a ParentID was expected for a content type,
+  making it possible to list arbitrary data types
+
 2011-08-01 v0.2.4
 -----------------
 

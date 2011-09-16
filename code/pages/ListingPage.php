@@ -140,18 +140,21 @@ class ListingPage extends Page {
 		// need to get the items being listed
 		$source = $this->getListingSource();
 
-		if (!$source) {
-			$source = $this;
-		}
+//		if (!$source) {
+//			$source = $this;
+//		}
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
+		
+		$filter = array();
+		
+		if ($source) {
+			$ids = $this->getIdsFrom($source, 1);
+			$ids[] = $source->ID;
 
-		$ids = $this->getIdsFrom($source, 1);
-		$ids[] = $source->ID;
-
-		$filter = array(
-			'ParentID IN ' => $ids,
-		);
+			$filter['ParentID IN '] = $ids;
+		}
+		
 
 		if ($this->StrictType) {
 			$filter['ClassName ='] = $listType;
