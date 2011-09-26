@@ -74,10 +74,10 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.Content.ListingSettings', $optionsetField);
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
 
-		if ($this->ListType && Object::has_extension($this->ListType, 'Hierarchy')) {
-			$listType = isset(self::$listing_type_source_map[$listType]) ? self::$listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
+		$sourceType = $this->effectiveSourceType();
+		if ($sourceType && Object::has_extension($sourceType, 'Hierarchy')) {
 			$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
-			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $listType));
+			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $sourceType));
 		}
 
 		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
@@ -126,23 +126,33 @@ class ListingPage extends Page {
 	 * @return DataObject
 	 */
 	protected function getListingSource() {
-		if ($this->ListType && $this->ListingSourceID) {
-			return DataObject::get_by_id($this->ListType, $this->ListingSourceID);
+		$sourceType = $this->effectiveSourceType();
+		if ($sourceType && $this->ListingSourceID) {
+			return DataObject::get_by_id($sourceType, $this->ListingSourceID);
 		}
+	}
+	
+	/**
+	 * Sometimes the type of a listing source will be different from that of the item being listed (eg
+	 * a news article might be beneath a news holder instead of another news article) so we need to 
+	 * figure out what that is based on the settings for this page. 
+	 *
+	 * @return string
+	 */
+	protected function effectiveSourceType() {
+		$listType = $this->ListType ? $this->ListType : 'Page';
+		$listType = isset(self::$listing_type_source_map[$listType]) ? self::$listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
+		return $listType;
 	}
 
 	/**
 	 * Retrieves all the listing items within this source
-	 *
+	 * 
 	 * @return DataObjectSource
 	 */
 	public function ListingItems() {
 		// need to get the items being listed
 		$source = $this->getListingSource();
-
-//		if (!$source) {
-//			$source = $this;
-//		}
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		
