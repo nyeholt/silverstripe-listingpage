@@ -251,7 +251,6 @@ class ListingPage_Controller extends Page_Controller {
 			
 			return $this->data()->Content();
 		}
-		
-		return $this->renderWith(array('ListingPage', 'Page'));
+		return array();
 	}
 }
