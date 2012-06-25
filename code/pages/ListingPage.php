@@ -198,18 +198,21 @@ class ListingPage extends Page {
 
 		$items = DataObject::get($listType, $filter, $sort, '', $limit);
 		/* @var $items DataObjectSet */
+		
+		$map = $items->toArray();
 
-		$items = PaginatedList::create($items);
+		$newList = ArrayList::create();
 		if ($items) {
 			foreach ($items as $result) {
-				if (!$result->canView()) {
-					$items->remove($result);
+				if ($result->canView()) {
+					$newList->push($result);
 				}
 			}
-			$items->setPaginationGetVar($pageUrlVar);
+			$newList = PaginatedList::create($newList);
+			$newList->setPaginationGetVar($pageUrlVar);
 		}
 
-		return $items;
+		return $newList;
 	}
 
 	/**
