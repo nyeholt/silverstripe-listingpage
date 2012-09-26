@@ -22,6 +22,10 @@ class ListingPage extends Page {
 		'ContentType'				=> 'Varchar',
 		'CustomContentType'			=> 'Varchar',
 	);
+	
+	public static $defaults = array(
+		'Content'					=> '$Listing'
+	);
 
 	public static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
@@ -50,19 +54,19 @@ class ListingPage extends Page {
 
 		$templates = DataObject::get('ListingTemplate');
 		if ($templates) {
-			$templates = $templates->toDropDownMap('ID', 'Title', '(Select Template)');
+			$templates = $templates->map();
 		} else {
 			$templates = array();
 		}
 
-		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('ListingTemplateID', _t('ListingPage.CONTENT_TEMPLATE', 'Listing Template'), $templates));
-		$fields->addFieldToTab('Root.Content.ListingSettings', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
-		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
+		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('ListingTemplateID', _t('ListingPage.CONTENT_TEMPLATE', 'Listing Template'), $templates));
+		$fields->addFieldToTab('Root.ListingSettings', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
+		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
 
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		$objFields = $this->getSelectableFields($listType);
 
-		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
+		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
 		// $fields->addFieldToTab('Root.Content.Main', new TextField('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
 
 		$types = ClassInfo::subclassesFor('DataObject');
@@ -71,16 +75,16 @@ class ListingPage extends Page {
 		asort($source);
 
 		$optionsetField = new DropdownField('ListType', _t('ListingPage.PAGE_TYPE', 'List items of type'), $source, 'Any');
-		$fields->addFieldToTab('Root.Content.ListingSettings', $optionsetField);
-		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
+		$fields->addFieldToTab('Root.ListingSettings', $optionsetField);
+		$fields->addFieldToTab('Root.ListingSettings', new CheckboxField('StrictType', _t('ListingPage.STRICT_TYPE', 'List JUST this type, not descendents')));
 
 		$sourceType = $this->effectiveSourceType();
-		if ($sourceType && Object::has_extension($sourceType, 'Hierarchy')) {
-			$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
-			$fields->addFieldToTab('Root.Content.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $sourceType));
+		$parentType = $this->parentType($sourceType);
+		if ($sourceType && $parentType) {
+			$fields->addFieldToTab('Root.ListingSettings', new DropdownField('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
+			$fields->addFieldToTab('Root.ListingSettings', new TreeDropdownField('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $parentType));
+			$fields->addFieldToTab('Root.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 		}
-
-		$fields->addFieldToTab('Root.Content.ListingSettings', new CheckboxField('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
 
 		$contentTypes = array(
 			''						=> 'In Theme',
@@ -90,10 +94,15 @@ class ListingPage extends Page {
 			'application/rdf+xml'	=> 'RDF (xml)',
 			'application/atom+xml'	=> 'ATOM (xml)',
 		);
-		$fields->addFieldToTab('Root.Content.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
-		$fields->addFieldToTab('Root.Content.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
+		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
+		$fields->addFieldToTab('Root.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
 
 		return $fields;
+	}
+	
+	protected function parentType($type) {
+		$has_one = Config::inst()->get($type, 'has_one');
+		return isset($has_one['Parent']) ? $has_one['Parent'] : null;
 	}
 
 	protected function getSelectableFields($listType) {
@@ -189,17 +198,24 @@ class ListingPage extends Page {
 
 		$items = DataObject::get($listType, $filter, $sort, '', $limit);
 		/* @var $items DataObjectSet */
+		
+		$map = $items->toArray();
 
+		$newList = ArrayList::create();
 		if ($items) {
 			foreach ($items as $result) {
-				if (!$result->canView()) {
-					$items->remove($result);
+				if ($result->canView()) {
+					$newList->push($result);
 				}
 			}
-			$items->setPaginationGetVar($pageUrlVar);
+
+			$limit = $this->PerPage ? $this->PerPage : 9999999;
+			$newList = PaginatedList::create($newList);
+			$newList->setPaginationGetVar($pageUrlVar);
+			$newList->setPageLength($limit);
 		}
 
-		return $items;
+		return $newList;
 	}
 
 	/**
@@ -241,7 +257,6 @@ class ListingPage_Controller extends Page_Controller {
 			
 			return $this->data()->Content();
 		}
-		
-		return $this->renderWith(array('ListingPage', 'Page'));
+		return array();
 	}
 }
