@@ -208,8 +208,11 @@ class ListingPage extends Page {
 					$newList->push($result);
 				}
 			}
+
+			$limit = $this->PerPage ? $this->PerPage : 9999999;
 			$newList = PaginatedList::create($newList);
 			$newList->setPaginationGetVar($pageUrlVar);
+			$newList->setPageLength($limit);
 		}
 
 		return $newList;
