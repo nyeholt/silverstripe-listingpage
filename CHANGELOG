@@ -1,3 +1,9 @@
+2013-01-13 v1.0.0
+-----------------
+
+* SS3 first stable update. Note that pagination now does NOT filter canView 
+  items; you must do this yourself from the template
+
 2011-09-26 v0.2.6
 -----------------
 

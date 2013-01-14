@@ -171,17 +171,16 @@ class ListingPage extends Page {
 			$ids = $this->getIdsFrom($source, 1);
 			$ids[] = $source->ID;
 
-			$filter['ParentID IN '] = $ids;
+			$filter['ParentID:ExactMatchMulti'] = $ids;
 		}
 		
 
 		if ($this->StrictType) {
-			$filter['ClassName ='] = $listType;
+			$filter['ClassName'] = $listType;
 		}
 
 		$objFields = $this->getSelectableFields($listType);
 
-		$filter = singleton('ListingPageUtils')->dbQuote($filter);
 		$sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
 		$sort = $this->SortBy && isset($objFields[$this->SortBy]) ? $this->SortBy : 'Title';
 		// $sort = $this->CustomSort ? $this->CustomSort : $sort;
@@ -191,28 +190,26 @@ class ListingPage extends Page {
 
 		$pageUrlVar = 'page' . $this->ID;
 
+		$items = DataList::create($listType)->filter($filter)->sort($sort);
+		
 		if ($this->PerPage) {
 			$page = isset($_REQUEST[$pageUrlVar]) ? $_REQUEST[$pageUrlVar] : 0;
-			$limit = "$page,$this->PerPage";
+			$items  = $items->limit($this->PerPage, $page);
 		}
-
-		$items = DataObject::get($listType, $filter, $sort, '', $limit);
-		/* @var $items DataObjectSet */
-		
-		$map = $items->toArray();
 
 		$newList = ArrayList::create();
 		if ($items) {
-			foreach ($items as $result) {
-				if ($result->canView()) {
-					$newList->push($result);
-				}
-			}
-
-			$limit = $this->PerPage ? $this->PerPage : 9999999;
-			$newList = PaginatedList::create($newList);
+			// note: Access control is no longer being enforced by the page type! You'll need to 
+			// manually include canView checks in your listing templates...
+//			foreach ($items as $result) {
+//				if ($result->canView()) {
+//					$newList->push($result);
+//				}
+//			}
+//
+			$newList = PaginatedList::create($items);
 			$newList->setPaginationGetVar($pageUrlVar);
-			$newList->setPageLength($limit);
+			$newList->setPaginationFromQuery($items->dataQuery()->query());
 		}
 
 		return $newList;

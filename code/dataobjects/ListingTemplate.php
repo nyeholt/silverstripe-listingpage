@@ -11,10 +11,16 @@ class ListingTemplate extends DataObject {
 		'Title'				=> 'Varchar(127)',
 		'ItemTemplate'		=> 'Text',
 	);
+	
+	public static $defaults = array(
+		'ItemTemplate'		=> "\t<% loop \$Items %>\n\t\t<p>\$Title</p>\n\t<% end_loop %>",
+	);
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		$fields->replaceField('ItemTemplate', new TextareaField('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Item variable to iterate over)'), 20));
+		$fields->replaceField('ItemTemplate', $ta = new TextareaField('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));
+		$ta->setRows(20);
+		$ta->setColumns(120);
 		return $fields;
 	}
 }
