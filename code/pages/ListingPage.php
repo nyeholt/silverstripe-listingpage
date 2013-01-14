@@ -41,7 +41,7 @@ class ListingPage extends Page {
 		'Folder'	=> 'Folder'
 	);
 
-	public static $icon = 'listingpage/images/listing-page';
+	public static $icon = 'listingpage/images/listingpage.png';
 
 	/**
 	 * @return FieldSet

@@ -10,4 +10,6 @@ class ListingAdmin extends ModelAdmin {
 	public static $url_segment = 'listing';
 	public static $menu_title = 'Listings';
 	public static $managed_models = array('ListingTemplate');
+	
+	public static $menu_icon = 'listingpage/images/listingpage.png';
 }
