@@ -1,3 +1,8 @@
+2013-08-26 v0.2.7
+-----------------
+
+* FIX Security patch to fix potential SQL injection point in LIMIT clause
+
 2011-09-26 v0.2.6
 -----------------
 

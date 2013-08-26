@@ -183,7 +183,7 @@ class ListingPage extends Page {
 		$pageUrlVar = 'page' . $this->ID;
 
 		if ($this->PerPage) {
-			$page = isset($_REQUEST[$pageUrlVar]) ? $_REQUEST[$pageUrlVar] : 0;
+			$page = isset($_REQUEST[$pageUrlVar]) ? (int) $_REQUEST[$pageUrlVar] : 0;
 			$limit = "$page,$this->PerPage";
 		}
 
