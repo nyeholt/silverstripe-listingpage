@@ -193,7 +193,7 @@ class ListingPage extends Page {
 		$items = DataList::create($listType)->filter($filter)->sort($sort);
 		
 		if ($this->PerPage) {
-			$page = isset($_REQUEST[$pageUrlVar]) ? $_REQUEST[$pageUrlVar] : 0;
+			$page = isset($_REQUEST[$pageUrlVar]) ? (int) $_REQUEST[$pageUrlVar] : 0;
 			$items  = $items->limit($this->PerPage, $page);
 		}
 

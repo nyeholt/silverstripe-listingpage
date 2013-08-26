@@ -1,3 +1,9 @@
+2013-08-26 v1.0.1
+-----------------
+
+* FIX Security patch to fix potential SQL injection point in LIMIT clause 
+  (though the framework enforces is_numeric anyway)
+
 2013-01-13 v1.0.0
 -----------------
 
