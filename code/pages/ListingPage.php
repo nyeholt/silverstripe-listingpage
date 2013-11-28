@@ -171,7 +171,7 @@ class ListingPage extends Page {
 			$ids = $this->getIdsFrom($source, 1);
 			$ids[] = $source->ID;
 
-			$filter['ParentID:ExactMatchMulti'] = $ids;
+			$filter['ParentID:ExactMatch'] = $ids;
 		}
 		
 
