@@ -166,12 +166,17 @@ class ListingPage extends Page {
 		$listType = $this->ListType ? $this->ListType : 'Page';
 		
 		$filter = array();
+
+		$objFields = $this->getSelectableFields($listType);
 		
 		if ($source) {
 			$ids = $this->getIdsFrom($source, 1);
 			$ids[] = $source->ID;
 
-			$filter['ParentID:ExactMatch'] = $ids;
+			if (isset($objFields['ParentID']) && count($ids)) {
+				$filter['ParentID:ExactMatch'] = $ids;
+			}
+
 		}
 		
 
@@ -179,7 +184,6 @@ class ListingPage extends Page {
 			$filter['ClassName'] = $listType;
 		}
 
-		$objFields = $this->getSelectableFields($listType);
 
 		$sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
 		$sort = $this->SortBy && isset($objFields[$this->SortBy]) ? $this->SortBy : 'Title';
