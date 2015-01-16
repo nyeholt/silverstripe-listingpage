@@ -1,7 +1,6 @@
 {
 	"name": "silverstripe/listingpage",
 	"description": "A page type that allows CMS authors to create templated content listings within the CMS",
-	"version": "1.0.0",
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "pagetype", "template"],
 	"license": "BSD-3-Clause",
