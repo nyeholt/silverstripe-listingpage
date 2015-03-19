@@ -10,7 +10,7 @@
  * @author marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class SortableChildrenExtension extends DataObjectDecorator {
+class SortableChildrenExtension extends DataExtension {
 	
 	protected $_cache_children = array();
 	
@@ -27,7 +27,7 @@ class SortableChildrenExtension extends DataObjectDecorator {
 		if(!isset($this->_cache_children[$key])) { 
 			$result = $this->owner->filteredStageChildren(false, $filter, $sort); 
 		 	if(isset($result)) { 
-		 		$this->_cache_children[$key] = new DataObjectSet(); 
+		 		$this->_cache_children[$key] = new ArrayList(); 
 		 		foreach($result as $child) { 
 		 			if($child->canView()) { 
 		 				$this->_cache_children[$key]->push($child); 
@@ -69,7 +69,7 @@ class SortableChildrenExtension extends DataObjectDecorator {
 			. (int)$this->owner->ID . " AND \"{$baseClass}\".\"ID\" != " . (int)$this->owner->ID
 			. $extraFilter, $sort);
 			
-		if(!$staged) $staged = new DataObjectSet();
+		if(!$staged) $staged = new ArrayList();
 		$this->owner->extend("augmentStageChildren", $staged, $showAll);
 		return $staged;
 	}
