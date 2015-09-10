@@ -7,7 +7,7 @@
  */
 class ListingPage extends Page {
 
-	public static $db = array(
+	private static $db = array(
 		'PerPage'					=> 'Int',
 		'Style'						=> "Enum('Standard,A to Z')",
 		'SortBy'					=> "Varchar(64)",
@@ -22,12 +22,8 @@ class ListingPage extends Page {
 		'ContentType'				=> 'Varchar',
 		'CustomContentType'			=> 'Varchar',
 	);
-	
-	public static $defaults = array(
-		'Content'					=> '$Listing'
-	);
 
-	public static $has_one = array(
+	private static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
 	);
 
@@ -37,11 +33,11 @@ class ListingPage extends Page {
 	 *
 	 * @var array
 	 */
-	public static $listing_type_source_map = array(
+	private static $listing_type_source_map = array(
 		'Folder'	=> 'Folder'
 	);
 
-	public static $icon = 'listingpage/images/listingpage.png';
+	private static $icon = 'listingpage/images/listingpage.png';
 
 	/**
 	 * @return FieldSet
@@ -123,6 +119,9 @@ class ListingPage extends Page {
 	 */
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
+		if (!$this->ID) {
+			$this->Content = '$Listing';
+		}
 		if ($this->ClearSource) {
 			$this->ClearSource = false;
 			$this->ListingSourceID = 0;
@@ -150,7 +149,7 @@ class ListingPage extends Page {
 	 */
 	protected function effectiveSourceType() {
 		$listType = $this->ListType ? $this->ListType : 'Page';
-		$listType = isset(self::$listing_type_source_map[$listType]) ? self::$listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
+		$listType = isset($this->config()->listing_type_source_map[$listType]) ? $this->config()->listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
 		return $listType;
 	}
 
