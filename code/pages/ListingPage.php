@@ -84,11 +84,11 @@ class ListingPage extends Page {
 
 		$contentTypes = array(
 			''						=> 'In Theme',
-			'text/html'				=> 'HTML Fragment',
-			'text/xml'				=> 'XML',
-			'application/rss+xml'	=> 'RSS (xml)',
-			'application/rdf+xml'	=> 'RDF (xml)',
-			'application/atom+xml'	=> 'ATOM (xml)',
+			'text/html; charset=utf-8'				=> 'HTML Fragment',
+			'text/xml; charset=utf-8'				=> 'XML',
+			'application/rss+xml; charset=utf-8'	=> 'RSS (xml)',
+			'application/rdf+xml; charset=utf-8'	=> 'RDF (xml)',
+			'application/atom+xml; charset=utf-8'	=> 'ATOM (xml)',
 		);
 		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
 		$fields->addFieldToTab('Root.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
