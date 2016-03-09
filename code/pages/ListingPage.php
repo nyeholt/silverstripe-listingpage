@@ -199,6 +199,8 @@ class ListingPage extends Page {
 			$page = isset($_REQUEST[$pageUrlVar]) ? (int) $_REQUEST[$pageUrlVar] : 0;
 			$items  = $items->limit($this->PerPage, $page);
 		}
+		
+		$this->extend('updateListingItems', $items);
 
 		$newList = ArrayList::create();
 		if ($items) {
