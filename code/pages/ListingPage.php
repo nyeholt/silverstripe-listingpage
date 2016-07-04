@@ -21,10 +21,15 @@ class ListingPage extends Page {
 		
 		'ContentType'				=> 'Varchar',
 		'CustomContentType'			=> 'Varchar',
+
+		'ComponentFilterName'		=> 'Varchar(64)',
+		'ComponentFilterColumn'		=> 'Varchar(64)',
+		'ComponentFilterWhere'		=> 'MultiValueField',
 	);
 
 	private static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
+		'ComponentListingTemplate'	=> 'ListingTemplate',
 	);
 
 	/**
@@ -93,6 +98,39 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
 		$fields->addFieldToTab('Root.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
 
+		if ($listType) {
+			$componentsManyMany = singleton($this->ListType)->config()->many_many;
+			$componentNames = array();
+			foreach ($componentsManyMany as $componentName => $className) {
+				$componentNames[$componentName] = FormField::name_to_label($componentName) . ' ('.$className.')';
+			}
+			$fields->addFieldToTab('Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
+				->setEmptyString('(Select)')
+				->setRightTitle('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})'));
+			$fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Relation Field')->setEmptyString('(Must select a relation and save)')); 
+			$fields->addFieldToTab('Root.ListingSettings', $componentListingField = DropdownField::create('ComponentListingTemplateID', _t('ListingPage.COMPONENT_CONTENT_TEMPLATE', 'Relation Listing Template'))->setEmptyString('(Must select a relation and save)'));
+			if ($this->ComponentFilterName) {
+				$componentClass = isset($componentsManyMany[$this->ComponentFilterName]) ? $componentsManyMany[$this->ComponentFilterName] : '';
+				if ($componentClass) {
+					$componentFields = array();
+					foreach ($this->getSelectableFields($componentClass) as $columnName => $type) {
+						$componentFields[$columnName] = $columnName;
+					}
+					$componentColumnField->setSource($componentFields);
+					$componentColumnField->setEmptyString('(Select)');
+
+					$componentListingField->setSource($templates);
+					$componentListingField->setHasEmptyDefault(false);
+
+					if (class_exists('KeyValueField'))
+					{
+						$fields->addFieldToTab('Root.ListingSettings', KeyValueField::create('ComponentFilterWhere', 'Constrain Relation By', $componentFields)
+							->setRightTitle("Filter '{$this->ComponentFilterName}' with these properties."));
+					}
+				}
+			}
+		}
+
 		return $fields;
 	}
 	
@@ -154,9 +192,24 @@ class ListingPage extends Page {
 	}
 
 	/**
+	 * Retrieves all the component/relation listing items
+	 * 
+	 * @return SS_List
+	 */
+	public function ComponentListingItems() {
+		$tagClass = isset(singleton($this->ListType)->config()->many_many[$this->ComponentFilterName]) ? singleton($this->ListType)->config()->many_many[$this->ComponentFilterName] : null;
+		$result = DataList::create($tagClass);
+		if ($this->ComponentFilterWhere && ($componentWhereFilters = $this->ComponentFilterWhere->getValue()))
+		{
+			$result = $result->filter($componentWhereFilters);
+		}
+		return $result;
+	}
+
+	/**
 	 * Retrieves all the listing items within this source
 	 * 
-	 * @return DataObjectSource
+	 * @return SS_List
 	 */
 	public function ListingItems() {
 		// need to get the items being listed
@@ -199,6 +252,44 @@ class ListingPage extends Page {
 			$page = isset($_REQUEST[$pageUrlVar]) ? (int) $_REQUEST[$pageUrlVar] : 0;
 			$items  = $items->limit($this->PerPage, $page);
 		}
+
+
+		if ($this->ComponentFilterName) {
+			$controller = (Controller::has_curr()) ? Controller::curr() : null;
+			$tags = array();
+			if ($controller && $controller instanceof ListingPage_Controller)
+			{
+				$tagName = $controller->getRequest()->latestParam('Action');
+
+				if ($tagName) {
+					$tags = $this->ComponentListingItems();
+					$tags = $tags->filter(array($this->ComponentFilterColumn => $tagName));
+					
+					$tags = $tags->toArray();
+					if (!$tags)
+					{
+						// Workaround cms/#1045
+		                // - Stop infinite redirect
+		                // @see: https://github.com/silverstripe/silverstripe-cms/issues/1045
+						unset($controller->extension_instances['OldPageRedirector']);
+
+						return $controller->httpError(404);
+					}
+				}
+			}
+			
+			if ($tags) {
+				if (count($tags) > 1) {
+					return $controller->httpError(500, 'ComponentFilterColumn provided is not unique. '.count($tags).' matches found in query.');
+				}
+				$tag = reset($tags);
+
+				list($parentClass, $componentClass, $pageIDColumnName, $tagIDColumnName, $tagManyManyTable) = singleton($this->ListType)->manyManyComponent($this->ComponentFilterName);
+				$items = $items->innerJoin($tagManyManyTable, "\"{$pageIDColumnName}\" = \"$parentClass\".\"ID\" AND \"{$tagIDColumnName}\" = ".(int)$tag->ID);
+			} else {
+				$tags = new ArrayList();
+			}
+		}
 		
 		$this->extend('updateListingItems', $items);
 
@@ -214,7 +305,9 @@ class ListingPage extends Page {
 //
 			$newList = PaginatedList::create($items);
 			$newList->setPaginationGetVar($pageUrlVar);
-			$newList->setPaginationFromQuery($items->dataQuery()->query());
+			if ($items instanceof DataList) {
+				$newList->setPaginationFromQuery($items->dataQuery()->query());
+			}
 		}
 
 		return $newList;
@@ -242,15 +335,27 @@ class ListingPage extends Page {
 	}
 
 	public function Content() {
-		$items = $this->ListingItems();
-		$item = $this->customise(array('Items' => $items));
-		$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
+		$action = (Controller::has_curr()) ? Controller::curr()->getRequest()->latestParam('Action') : null;
+		if ($this->ComponentFilterName && !$action) {
+			// For a list of relations like tags/categories/etc
+			$items = $this->ComponentListingItems();
+			$item = $this->customise(array('Items' => $items));
+			$view = SSViewer::fromString($this->ComponentListingTemplate()->ItemTemplate);
+		} else {
+			$items = $this->ListingItems();
+			$item = $this->customise(array('Items' => $items));
+			$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
+		}
 		$content = str_replace('<p>$Listing</p>', '$Listing', $this->Content);
 		return str_replace('$Listing', $view->process($item), $content);
 	}
 }
 
 class ListingPage_Controller extends Page_Controller {
+	private static $url_handlers = array(
+		'$Action' => 'index'
+	);
+
 	public function index() {
 		if (($this->data()->ContentType || $this->data()->CustomContentType)) {
 			// k, not doing it in the theme...
