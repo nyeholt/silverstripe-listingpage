@@ -24,11 +24,12 @@ class ListingPage extends Page {
 
 		'ComponentFilterName'		=> 'Varchar(64)',
 		'ComponentFilterColumn'		=> 'Varchar(64)',
-		'ComponentFilterWhere'		=> 'MultiValueField', // todo(Jake): move to get_extra_config or extension
+		'ComponentFilterWhere'		=> 'MultiValueField',
 	);
 
 	private static $has_one = array(
 		'ListingTemplate'			=> 'ListingTemplate',
+		'ComponentListingTemplate'	=> 'ListingTemplate',
 	);
 
 	/**
@@ -103,10 +104,11 @@ class ListingPage extends Page {
 			foreach ($componentsManyMany as $componentName => $className) {
 				$componentNames[$componentName] = FormField::name_to_label($componentName) . ' ('.$className.')';
 			}
-			$fields->addFieldToTab('Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.TAG_COMPONENT_NAME', 'Filter by Component'), $componentNames)
+			$fields->addFieldToTab('Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
 				->setEmptyString('(Select)')
 				->setRightTitle('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})'));
-			$fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Component Field')->setEmptyString('(Must select a component and save)')); 
+			$fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Relation Field')->setEmptyString('(Must select a relation and save)')); 
+			$fields->addFieldToTab('Root.ListingSettings', $componentListingField = DropdownField::create('ComponentListingTemplateID', _t('ListingPage.COMPONENT_CONTENT_TEMPLATE', 'Relation Listing Template'))->setEmptyString('(Must select a relation and save)'));
 			if ($this->ComponentFilterName) {
 				$componentClass = isset($componentsManyMany[$this->ComponentFilterName]) ? $componentsManyMany[$this->ComponentFilterName] : '';
 				if ($componentClass) {
@@ -117,9 +119,12 @@ class ListingPage extends Page {
 					$componentColumnField->setSource($componentFields);
 					$componentColumnField->setEmptyString('(Select)');
 
+					$componentListingField->setSource($templates);
+					$componentListingField->setHasEmptyDefault(false);
+
 					if (class_exists('KeyValueField'))
 					{
-						$fields->addFieldToTab('Root.ListingSettings', KeyValueField::create('ComponentFilterWhere', 'Constrain By', $componentFields)
+						$fields->addFieldToTab('Root.ListingSettings', KeyValueField::create('ComponentFilterWhere', 'Constrain Relation By', $componentFields)
 							->setRightTitle("Filter '{$this->ComponentFilterName}' with these properties."));
 					}
 				}
@@ -187,9 +192,24 @@ class ListingPage extends Page {
 	}
 
 	/**
+	 * Retrieves all the component/relation listing items
+	 * 
+	 * @return SS_List
+	 */
+	public function ComponentListingItems() {
+		$tagClass = isset(singleton($this->ListType)->config()->many_many[$this->ComponentFilterName]) ? singleton($this->ListType)->config()->many_many[$this->ComponentFilterName] : null;
+		$result = DataList::create($tagClass);
+		if ($this->ComponentFilterWhere && ($componentWhereFilters = $this->ComponentFilterWhere->getValue()))
+		{
+			$result = $result->filter($componentWhereFilters);
+		}
+		return $result;
+	}
+
+	/**
 	 * Retrieves all the listing items within this source
 	 * 
-	 * @return DataObjectSource
+	 * @return SS_List
 	 */
 	public function ListingItems() {
 		// need to get the items being listed
@@ -242,12 +262,9 @@ class ListingPage extends Page {
 				$tagName = $controller->getRequest()->latestParam('Action');
 
 				if ($tagName) {
-					$tagClass = isset(singleton($this->ListType)->config()->many_many[$this->ComponentFilterName]) ? singleton($this->ListType)->config()->many_many[$this->ComponentFilterName] : null;
-					$tags = DataList::create($tagClass)->filter(array($this->ComponentFilterColumn => $tagName));
-					if ($this->ComponentFilterWhere && ($componentWhereFilters = $this->ComponentFilterWhere->getValue()))
-					{
-						$tags = $tags->filter($componentWhereFilters);
-					}
+					$tags = $this->ComponentListingItems();
+					$tags = $tags->filter(array($this->ComponentFilterColumn => $tagName));
+					
 					$tags = $tags->toArray();
 					if (!$tags)
 					{
@@ -318,9 +335,17 @@ class ListingPage extends Page {
 	}
 
 	public function Content() {
-		$items = $this->ListingItems();
-		$item = $this->customise(array('Items' => $items));
-		$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
+		$action = (Controller::has_curr()) ? Controller::curr()->getRequest()->latestParam('Action') : null;
+		if ($this->ComponentFilterName && !$action) {
+			// For a list of relations like tags/categories/etc
+			$items = $this->ComponentListingItems();
+			$item = $this->customise(array('Items' => $items));
+			$view = SSViewer::fromString($this->ComponentListingTemplate()->ItemTemplate);
+		} else {
+			$items = $this->ListingItems();
+			$item = $this->customise(array('Items' => $items));
+			$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
+		}
 		$content = str_replace('<p>$Listing</p>', '$Listing', $this->Content);
 		return str_replace('$Listing', $view->process($item), $content);
 	}
@@ -332,12 +357,6 @@ class ListingPage_Controller extends Page_Controller {
 	);
 
 	public function index() {
-		$action = $this->request->latestParam('Action');
-		if (($action && !$this->ComponentFilterName) || (!$action && $this->ComponentFilterName)) {
-			// - If component filter name is set, but the action is missing, throw error
-			// - If the component filter isnt set, but there is an action, throw error.
-			return $this->httpError(404);
-		}
 		if (($this->data()->ContentType || $this->data()->CustomContentType)) {
 			// k, not doing it in the theme...
 			$contentType = $this->data()->ContentType ? $this->data()->ContentType : $this->data()->CustomContentType;
