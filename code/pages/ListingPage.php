@@ -32,6 +32,10 @@ class ListingPage extends Page {
 		'ComponentListingTemplate'	=> 'ListingTemplate',
 	);
 
+	private static $defaults = array(
+		'ListType'					=> 'Page',
+	);
+
 	/**
 	 * A mapping between ListType selected and the type of items that should be shown in the "Source" 
 	 * selection tree. If not specified in this mapping, it is assumed to be 'Page'.
@@ -98,7 +102,7 @@ class ListingPage extends Page {
 		$fields->addFieldToTab('Root.ListingSettings', new DropdownField('ContentType', _t('ListingPage.CONTENT_TYPE', 'Content Type'), $contentTypes));
 		$fields->addFieldToTab('Root.ListingSettings', new TextField('CustomContentType', _t('ListingPage.CUSTOM_CONTENT_TYPE', 'Custom Content Type')));
 
-		if ($listType) {
+		if ($this->ListType) {
 			$componentsManyMany = singleton($this->ListType)->config()->many_many;
 			$componentNames = array();
 			foreach ($componentsManyMany as $componentName => $className) {
