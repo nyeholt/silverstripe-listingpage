@@ -204,15 +204,9 @@ class ListingPage extends Page {
 
 		$newList = ArrayList::create();
 		if ($items) {
-			// note: Access control is no longer being enforced by the page type! You'll need to 
-			// manually include canView checks in your listing templates...
-//			foreach ($items as $result) {
-//				if ($result->canView()) {
-//					$newList->push($result);
-//				}
-//			}
-//
 			$newList = PaginatedList::create($items);
+            // ensure the 0 limit is applied if configured as such
+            $newList->setPageLength($this->PerPage);
 			$newList->setPaginationGetVar($pageUrlVar);
 			$newList->setPaginationFromQuery($items->dataQuery()->query());
 		}
