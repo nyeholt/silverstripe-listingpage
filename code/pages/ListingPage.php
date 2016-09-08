@@ -236,6 +236,9 @@ class ListingPage extends Page {
 	}
 
 	public function Content() {
+        if (!$this->ID) {
+            return '';
+        }
 		$items = $this->ListingItems();
 		$item = $this->customise(array('Items' => $items));
 		$view = SSViewer::fromString($this->ListingTemplate()->ItemTemplate);
