@@ -333,6 +333,9 @@ class ListingPage extends Page {
 	}
 
 	public function Content() {
+        if (!$this->ID) {
+            return '';
+        }
 		$action = (Controller::has_curr()) ? Controller::curr()->getRequest()->latestParam('Action') : null;
 		if ($this->ComponentFilterName && !$action) {
 			// For a list of relations like tags/categories/etc
