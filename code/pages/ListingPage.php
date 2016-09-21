@@ -33,7 +33,8 @@ class ListingPage extends Page {
 	);
 
 	private static $defaults = array(
-		'ListType'					=> 'Page',
+		'ListType' => 'Page',
+		'PerPage'  => 10,
 	);
 
 	/**
@@ -47,10 +48,6 @@ class ListingPage extends Page {
 	);
 
 	private static $icon = 'listingpage/images/listingpage.png';
-    
-    private static $defaults = array(
-        'PerPage'   => 10,
-    );
 
 	/**
 	 * @return FieldSet
