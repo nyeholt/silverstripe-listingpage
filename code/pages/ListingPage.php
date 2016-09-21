@@ -38,6 +38,10 @@ class ListingPage extends Page {
 	);
 
 	private static $icon = 'listingpage/images/listingpage.png';
+    
+    private static $defaults = array(
+        'PerPage'   => 10,
+    );
 
 	/**
 	 * @return FieldSet
