@@ -105,6 +105,9 @@ class ListingPage extends Page {
 
 		if ($this->ListType) {
 			$componentsManyMany = singleton($this->ListType)->config()->many_many;
+			if (!is_array($componentsManyMany)){
+				$componentsManyMany = array();
+			}
 			$componentNames = array();
 			foreach ($componentsManyMany as $componentName => $className) {
 				$componentNames[$componentName] = FormField::name_to_label($componentName) . ' ('.$className.')';
