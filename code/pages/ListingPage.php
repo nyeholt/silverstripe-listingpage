@@ -362,7 +362,13 @@ class ListingPage_Controller extends Page_Controller {
 	);
 
 	public function index() {
-		if (($this->data()->ContentType || $this->data()->CustomContentType)) {
+
+		// This is required so the listing page doesn't eat AJAX requests against the page controller.
+		$action = $this->getRequest()->latestParam('Action');
+		if ($action && $this->hasMethod($action)) {
+			return $this->$action();
+		}
+		else if (($this->data()->ContentType || $this->data()->CustomContentType)) {
 			// k, not doing it in the theme...
 			$contentType = $this->data()->ContentType ? $this->data()->ContentType : $this->data()->CustomContentType;
 			$this->response->addHeader('Content-type', $contentType);
