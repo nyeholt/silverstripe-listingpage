@@ -49,9 +49,6 @@ class ListingPage extends Page {
 
 	private static $icon = 'listingpage/images/listingpage.png';
     
-	/**
-	 * @return FieldSet
-	 */
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
 		/* @var FieldSet $fields */
