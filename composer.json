@@ -1,5 +1,5 @@
 {
-	"name": "silverstripe/listingpage",
+	"name": "symbiote/silverstripe-listingpage",
 	"description": "A page type that allows CMS authors to create templated content listings within the CMS",
 	"type": "silverstripe-module",
 	"keywords": ["silverstripe", "pagetype", "template"],
@@ -7,17 +7,18 @@
 	"authors": [
 	{
 		"name": "Marcus Nyeholt",
-		"email": "marcus@silverstripe.com.au"
+		"email": "marcus@symbiote.com.au"
 	}
 	],
 	"require":
 	{
-		"silverstripe/framework": "~3.1",
-		"silverstripe/multivaluefield": "~2.0"
+		"silverstripe/framework": "~3.2",
+		"silverstripe/multivaluefield": "~2.4"
 	},
 	"extra": {
+		"installer-name": "listingpage",
 		"branch-alias": {
-			"dev-master": "1.2.x-dev"
+			"dev-master": "1.3.x-dev"
 		}
 	}
 }
