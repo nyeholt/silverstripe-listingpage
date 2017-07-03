@@ -13,7 +13,7 @@
 	"require":
 	{
 		"silverstripe/framework": "~3.2",
-		"silverstripe/multivaluefield": "~2.4"
+		"symbiote/silverstripe-multivaluefield": "~2.4"
 	},
 	"extra": {
 		"installer-name": "listingpage",
