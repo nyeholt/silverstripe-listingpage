@@ -169,12 +169,9 @@ class ListingPage extends Page {
     }
 
     protected function getSelectableFields($listType) {
-        $objFields = singleton($listType)->inheritedDatabaseFields();
+        $objFields = static::getSchema()->fieldSpecs($listType);
         $objFields = array_keys($objFields);
         $objFields = array_combine($objFields, $objFields);
-        $objFields['LastEdited'] = 'LastEdited';
-        $objFields['Created'] = 'Created';
-        $objFields['ID'] = 'ID';
 
         ksort($objFields);
         return $objFields;
