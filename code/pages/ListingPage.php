@@ -90,13 +90,14 @@ class ListingPage extends Page {
         $fields->addFieldToTab('Root.ListingSettings', new NumericField('PerPage', _t('ListingPage.PER_PAGE', 'Items Per Page')));
         $fields->addFieldToTab('Root.ListingSettings', new DropdownField('SortDir', _t('ListingPage.SORT_DIR', 'Sort Direction'), $this->dbObject('SortDir')->enumValues()));
 
-        $listType = $this->ListType ? $this->ListType : 'Page';
+        $listType = $this->ListType ? $this->ListType : Page::class;
         $objFields = $this->getSelectableFields($listType);
 
         $fields->addFieldToTab('Root.ListingSettings', new DropdownField('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
         // $fields->addFieldToTab('Root.Content.Main', new TextField('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
 
-        $types = ClassInfo::subclassesFor('DataObject');
+
+        $types = ClassInfo::subclassesFor(DataObject::class);
         array_shift($types);
         $source = array_combine($types, $types);
         asort($source);
@@ -135,7 +136,7 @@ class ListingPage extends Page {
             }
             $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
                 ->setEmptyString('(Select)')
-                ->setRightTitle('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})'));
+                ->setDescription('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})'));
             $fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Relation Field')->setEmptyString('(Must select a relation and save)'));
             $fields->addFieldToTab('Root.ListingSettings', $componentListingField = DropdownField::create('ComponentListingTemplateID', _t('ListingPage.COMPONENT_CONTENT_TEMPLATE', 'Relation Listing Template'))->setEmptyString('(Must select a relation and save)'));
             if ($this->ComponentFilterName) {
@@ -212,7 +213,7 @@ class ListingPage extends Page {
      * @return string
      */
     protected function effectiveSourceType() {
-        $listType = $this->ListType ? $this->ListType : 'Page';
+        $listType = $this->ListType ? $this->ListType : Page::class;
         $listType = isset($this->config()->listing_type_source_map[$listType]) ? $this->config()->listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
         return $listType;
     }
@@ -223,10 +224,11 @@ class ListingPage extends Page {
      * @return SS_List
      */
     public function ComponentListingItems() {
-        $tagClass = isset(singleton($this->ListType)->config()->many_many[$this->ComponentFilterName]) ? singleton($this->ListType)->config()->many_many[$this->ComponentFilterName] : null;
+        $manyMany = singleton($this->ListType)->config()->many_many;
+        $tagClass = isset($manyMany[$this->ComponentFilterName]) ? $manyMany[$this->ComponentFilterName] : '';
         $result = DataList::create($tagClass);
-        if ($this->ComponentFilterWhere && ($componentWhereFilters = $this->ComponentFilterWhere->getValue()))
-        {
+        if ($this->ComponentFilterWhere &&
+            ($componentWhereFilters = $this->ComponentFilterWhere->getValue())) {
             $result = $result->filter($componentWhereFilters);
         }
         return $result;
@@ -359,6 +361,7 @@ class ListingPage extends Page {
             return '';
         }
         $action = (Controller::has_curr()) ? Controller::curr()->getRequest()->latestParam('Action') : null;
+
         if ($this->ComponentFilterName && !$action) {
             // For a list of relations like tags/categories/etc
             $items = $this->ComponentListingItems();
