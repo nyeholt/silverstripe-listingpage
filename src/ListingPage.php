@@ -21,8 +21,6 @@ use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\PaginatedList;
 use SilverStripe\View\SSViewer;
 
-
-
 /**
  * A page that can be configured to create listings of other content
  *
@@ -30,6 +28,9 @@ use SilverStripe\View\SSViewer;
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class ListingPage extends Page {
+    /**
+     * @config
+     */
     private static $table_name = 'ListingPage';
 
     private static $db = array(
