@@ -37,8 +37,7 @@
     },
     "expose": [
       "client/images"
-    ],
-    "installer-name": "listingpage"
+    ]
   },
   "prefer-stable": true,
   "minimum-stability": "dev"
