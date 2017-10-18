@@ -20,7 +20,5 @@ class ListingAdmin extends ModelAdmin {
         ListingTemplate::class
     );
 
-    private static $menu_icon_class = false;
-
-    private static $menu_icon = 'symbiote/listingpage: images/listingpage.png';
+    private static $menu_icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
 }

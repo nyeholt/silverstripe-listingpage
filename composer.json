@@ -20,7 +20,7 @@
   ],
   "require": {
     "silverstripe/framework": "~4.0",
-    "symbiote/silverstripe-multivaluefield": "~4.0.3"
+    "symbiote/silverstripe-multivaluefield": "~4.0"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.0"

@@ -72,7 +72,7 @@ class ListingPage extends Page {
         'Folder'    => Folder::class
     );
 
-    private static $icon = 'symbiote/listingpage: images/listingpage.png';
+    private static $icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
 
     public function getCMSFields() {
         $fields = parent::getCMSFields();
