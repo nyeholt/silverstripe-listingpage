@@ -33,8 +33,11 @@
   },
   "extra": {
     "branch-alias": {
-        "dev-master": "2.0.x-dev"
+      "dev-master": "2.0.x-dev"
     },
+    "expose": [
+      "client/images"
+    ],
     "installer-name": "listingpage"
   },
   "prefer-stable": true,
