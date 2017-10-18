@@ -12,6 +12,8 @@ use SilverStripe\Forms\TextareaField;
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class ListingTemplate extends DataObject {
+    private static $table_name = 'ListingTemplate';
+
     private static $db = array(
         'Title'             => 'Varchar(127)',
         'ItemTemplate'      => 'Text',

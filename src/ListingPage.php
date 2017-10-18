@@ -30,6 +30,7 @@ use SilverStripe\View\SSViewer;
  * @license BSD License http://silverstripe.org/bsd-license/
  */
 class ListingPage extends Page {
+    private static $table_name = 'ListingPage';
 
     private static $db = array(
         'PerPage'                   => 'Int',
@@ -57,7 +58,7 @@ class ListingPage extends Page {
     );
 
     private static $defaults = array(
-        'ListType'                  => 'Page',
+        'ListType'                  => Page::class,
         'PerPage'                   => 10
     );
 
@@ -68,10 +69,10 @@ class ListingPage extends Page {
      * @var array
      */
     private static $listing_type_source_map = array(
-        'Folder'    => 'Folder'
+        'Folder'    => Folder::class
     );
 
-    private static $icon = 'listingpage/images/listingpage.png';
+    private static $icon = 'symbiote/listingpage: images/listingpage.png';
 
     public function getCMSFields() {
         $fields = parent::getCMSFields();
