@@ -24,10 +24,11 @@ use SilverStripe\View\SSViewer;
 /**
  * A page that can be configured to create listings of other content
  *
- * @author Marcus Nyeholt <marcus@silverstripe.com.au>
+ * @author  Marcus Nyeholt <marcus@silverstripe.com.au>
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class ListingPage extends Page {
+class ListingPage extends Page
+{
     /**
      * @config
      */
@@ -75,7 +76,8 @@ class ListingPage extends Page {
 
     private static $icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
 
-    public function getCMSFields() {
+    public function getCMSFields() 
+    {
         $fields = parent::getCMSFields();
         /* @var FieldSet $fields */
 
@@ -129,16 +131,18 @@ class ListingPage extends Page {
 
         if ($this->ListType) {
             $componentsManyMany = singleton($this->ListType)->config()->many_many;
-            if (!is_array($componentsManyMany)){
+            if (!is_array($componentsManyMany)) {
                 $componentsManyMany = array();
             }
             $componentNames = array();
             foreach ($componentsManyMany as $componentName => $className) {
                 $componentNames[$componentName] = FormField::name_to_label($componentName) . ' ('.$className.')';
             }
-            $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
+            $fields->addFieldToTab(
+                'Root.ListingSettings', DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
                 ->setEmptyString('(Select)')
-                ->setDescription('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})'));
+                ->setDescription('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})')
+            );
             $fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Relation Field')->setEmptyString('(Must select a relation and save)'));
             $fields->addFieldToTab('Root.ListingSettings', $componentListingField = DropdownField::create('ComponentListingTemplateID', _t('ListingPage.COMPONENT_CONTENT_TEMPLATE', 'Relation Listing Template'))->setEmptyString('(Must select a relation and save)'));
             if ($this->ComponentFilterName) {
@@ -154,10 +158,11 @@ class ListingPage extends Page {
                     $componentListingField->setSource($templates);
                     $componentListingField->setHasEmptyDefault(false);
 
-                    if (class_exists('KeyValueField'))
-                    {
-                        $fields->addFieldToTab('Root.ListingSettings', KeyValueField::create('ComponentFilterWhere', 'Constrain Relation By', $componentFields)
-                            ->setRightTitle("Filter '{$this->ComponentFilterName}' with these properties."));
+                    if (class_exists('KeyValueField')) {
+                        $fields->addFieldToTab(
+                            'Root.ListingSettings', KeyValueField::create('ComponentFilterWhere', 'Constrain Relation By', $componentFields)
+                            ->setRightTitle("Filter '{$this->ComponentFilterName}' with these properties.")
+                        );
                     }
                 }
             }
@@ -166,12 +171,14 @@ class ListingPage extends Page {
         return $fields;
     }
 
-    protected function parentType($type) {
+    protected function parentType($type) 
+    {
         $has_one = Config::inst()->get($type, 'has_one');
         return isset($has_one['Parent']) ? $has_one['Parent'] : null;
     }
 
-    protected function getSelectableFields($listType) {
+    protected function getSelectableFields($listType) 
+    {
         $objFields = static::getSchema()->fieldSpecs($listType);
         $objFields = array_keys($objFields);
         $objFields = array_combine($objFields, $objFields);
@@ -184,7 +191,8 @@ class ListingPage extends Page {
      * When saving, check to see whether we should delete the
      * listing source ID
      */
-    public function onBeforeWrite() {
+    public function onBeforeWrite() 
+    {
         parent::onBeforeWrite();
         if (!$this->ID) {
             $this->Content = '$Listing';
@@ -200,7 +208,8 @@ class ListingPage extends Page {
      *
      * @return DataObject
      */
-    protected function getListingSource() {
+    protected function getListingSource() 
+    {
         $sourceType = $this->effectiveSourceType();
         if ($sourceType && $this->ListingSourceID) {
             return DataObject::get_by_id($sourceType, $this->ListingSourceID);
@@ -214,7 +223,8 @@ class ListingPage extends Page {
      *
      * @return string
      */
-    protected function effectiveSourceType() {
+    protected function effectiveSourceType() 
+    {
         $listType = $this->ListType ? $this->ListType : Page::class;
         $listType = isset($this->config()->listing_type_source_map[$listType]) ? $this->config()->listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
         return $listType;
@@ -225,15 +235,17 @@ class ListingPage extends Page {
      *
      * @return SS_List
      */
-    public function ComponentListingItems() {
+    public function ComponentListingItems() 
+    {
         $manyMany = singleton($this->ListType)->config()->many_many;
         $tagClass = isset($manyMany[$this->ComponentFilterName]) ? $manyMany[$this->ComponentFilterName] : '';
         if (!$tagClass) {
             return new ArrayList();
         }
         $result = DataList::create($tagClass);
-        if ($this->ComponentFilterWhere &&
-            ($componentWhereFilters = $this->ComponentFilterWhere->getValue())) {
+        if ($this->ComponentFilterWhere 
+            && ($componentWhereFilters = $this->ComponentFilterWhere->getValue())
+        ) {
             $result = $result->filter($componentWhereFilters);
         }
         return $result;
@@ -244,7 +256,8 @@ class ListingPage extends Page {
      *
      * @return SS_List
      */
-    public function ListingItems() {
+    public function ListingItems() 
+    {
         // need to get the items being listed
         $source = $this->getListingSource();
 
@@ -290,8 +303,7 @@ class ListingPage extends Page {
         if ($this->ComponentFilterName) {
             $controller = (Controller::has_curr()) ? Controller::curr() : null;
             $tags = array();
-            if ($controller && $controller instanceof ListingPage_Controller)
-            {
+            if ($controller && $controller instanceof ListingPage_Controller) {
                 $tagName = $controller->getRequest()->latestParam('Action');
 
                 if ($tagName) {
@@ -299,8 +311,7 @@ class ListingPage extends Page {
                     $tags = $tags->filter(array($this->ComponentFilterColumn => $tagName));
 
                     $tags = $tags->toArray();
-                    if (!$tags)
-                    {
+                    if (!$tags) {
                         // Workaround cms/#1045
                         // - Stop infinite redirect
                         // @see: https://github.com/silverstripe/silverstripe-cms/issues/1045
@@ -344,9 +355,10 @@ class ListingPage extends Page {
      * Recursively find all the child items that need to be listed
      *
      * @param DataObject $parent
-     * @param int $depth
+     * @param int        $depth
      */
-    protected function getIdsFrom($parent, $depth) {
+    protected function getIdsFrom($parent, $depth) 
+    {
         if ($depth >= $this->Depth) {
             return;
         }
@@ -361,7 +373,8 @@ class ListingPage extends Page {
         return $ids;
     }
 
-    public function Content() {
+    public function Content() 
+    {
         if (!$this->ID) {
             return '';
         }

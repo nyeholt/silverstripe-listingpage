@@ -11,18 +11,21 @@ use SilverStripe\ORM\DataExtension;
  * it does allow template authors to pass through raw SQL - SS templates are still a
  * little too naive in that regard :/
  *
- * @author marcus@silverstripe.com.au
+ * @author  marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class SortableChildrenExtension extends DataExtension {
+class SortableChildrenExtension extends DataExtension
+{
 
     protected $_cache_children = array();
 
     /**
      * Get the children for this DataObject.
+     *
      * @return DataObjectSet
      */
-    public function FilteredChildren($filter = '', $sort = '"Sort" ASC') {
+    public function FilteredChildren($filter = '', $sort = '"Sort" ASC') 
+    {
         if ($filter == "null") {
             $filter = '';
         }
@@ -45,11 +48,12 @@ class SortableChildrenExtension extends DataExtension {
     /**
      * Return children from the stage site
      *
-     * @param showAll Inlcude all of the elements, even those not shown in the menus.
+     * @param  showAll Inlcude all of the elements, even those not shown in the menus.
      *   (only applicable when extension is applied to {@link SiteTree}).
      * @return DataObjectSet
      */
-    public function filteredStageChildren($showAll = false, $filter = '', $sort = '"Sort" ASC') {
+    public function filteredStageChildren($showAll = false, $filter = '', $sort = '"Sort" ASC') 
+    {
         $extraFilter = $filter;
         if($this->owner->db('ShowInMenus')) {
             $extraFilter .= ($showAll) ? '' : " AND \"ShowInMenus\"=1";
@@ -69,11 +73,14 @@ class SortableChildrenExtension extends DataExtension {
             $extraFilter = ' AND ' . $extraFilter;
         }
 
-        $staged = DataObject::get($baseClass, "\"{$baseClass}\".\"ParentID\" = "
+        $staged = DataObject::get(
+            $baseClass, "\"{$baseClass}\".\"ParentID\" = "
             . (int)$this->owner->ID . " AND \"{$baseClass}\".\"ID\" != " . (int)$this->owner->ID
-            . $extraFilter, $sort);
+            . $extraFilter, $sort
+        );
 
-        if(!$staged) $staged = new ArrayList();
+        if(!$staged) { $staged = new ArrayList();
+        }
         $this->owner->extend("augmentStageChildren", $staged, $showAll);
         return $staged;
     }
