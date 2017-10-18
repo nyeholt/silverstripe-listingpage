@@ -38,7 +38,7 @@ class ListingPage extends Page {
         'SortBy'                    => "Varchar(64)",
         'CustomSort'                => 'Varchar(64)',
         'SortDir'                   => "Enum('Ascending,Descending')",
-        'ListType'                  => 'Varchar(64)',
+        'ListType'                  => 'DBClassName(\'' . DataObject::class . '\', [\'index\' => false])',
         'ListingSourceID'           => 'Int',
         'Depth'                     => 'Int',
         'ClearSource'               => 'Boolean',
@@ -227,6 +227,9 @@ class ListingPage extends Page {
     public function ComponentListingItems() {
         $manyMany = singleton($this->ListType)->config()->many_many;
         $tagClass = isset($manyMany[$this->ComponentFilterName]) ? $manyMany[$this->ComponentFilterName] : '';
+        if (!$tagClass) {
+            return new ArrayList();
+        }
         $result = DataList::create($tagClass);
         if ($this->ComponentFilterWhere &&
             ($componentWhereFilters = $this->ComponentFilterWhere->getValue())) {
