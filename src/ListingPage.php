@@ -29,9 +29,6 @@ use SilverStripe\View\SSViewer;
  */
 class ListingPage extends Page
 {
-    /**
-     * @config
-     */
     private static $table_name = 'ListingPage';
 
     private static $db = array(
@@ -76,7 +73,7 @@ class ListingPage extends Page
 
     private static $icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
 
-    public function getCMSFields() 
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
         /* @var FieldSet $fields */
@@ -171,13 +168,13 @@ class ListingPage extends Page
         return $fields;
     }
 
-    protected function parentType($type) 
+    protected function parentType($type)
     {
         $has_one = Config::inst()->get($type, 'has_one');
         return isset($has_one['Parent']) ? $has_one['Parent'] : null;
     }
 
-    protected function getSelectableFields($listType) 
+    protected function getSelectableFields($listType)
     {
         $objFields = static::getSchema()->fieldSpecs($listType);
         $objFields = array_keys($objFields);
@@ -191,7 +188,7 @@ class ListingPage extends Page
      * When saving, check to see whether we should delete the
      * listing source ID
      */
-    public function onBeforeWrite() 
+    public function onBeforeWrite()
     {
         parent::onBeforeWrite();
         if (!$this->ID) {
@@ -208,7 +205,7 @@ class ListingPage extends Page
      *
      * @return DataObject
      */
-    protected function getListingSource() 
+    protected function getListingSource()
     {
         $sourceType = $this->effectiveSourceType();
         if ($sourceType && $this->ListingSourceID) {
@@ -223,7 +220,7 @@ class ListingPage extends Page
      *
      * @return string
      */
-    protected function effectiveSourceType() 
+    protected function effectiveSourceType()
     {
         $listType = $this->ListType ? $this->ListType : Page::class;
         $listType = isset($this->config()->listing_type_source_map[$listType]) ? $this->config()->listing_type_source_map[$listType] : ClassInfo::baseDataClass($listType);
@@ -235,7 +232,7 @@ class ListingPage extends Page
      *
      * @return SS_List
      */
-    public function ComponentListingItems() 
+    public function ComponentListingItems()
     {
         $manyMany = singleton($this->ListType)->config()->many_many;
         $tagClass = isset($manyMany[$this->ComponentFilterName]) ? $manyMany[$this->ComponentFilterName] : '';
@@ -243,7 +240,7 @@ class ListingPage extends Page
             return new ArrayList();
         }
         $result = DataList::create($tagClass);
-        if ($this->ComponentFilterWhere 
+        if ($this->ComponentFilterWhere
             && ($componentWhereFilters = $this->ComponentFilterWhere->getValue())
         ) {
             $result = $result->filter($componentWhereFilters);
@@ -256,7 +253,7 @@ class ListingPage extends Page
      *
      * @return SS_List
      */
-    public function ListingItems() 
+    public function ListingItems()
     {
         // need to get the items being listed
         $source = $this->getListingSource();
@@ -357,7 +354,7 @@ class ListingPage extends Page
      * @param DataObject $parent
      * @param int        $depth
      */
-    protected function getIdsFrom($parent, $depth) 
+    protected function getIdsFrom($parent, $depth)
     {
         if ($depth >= $this->Depth) {
             return;
@@ -373,7 +370,7 @@ class ListingPage extends Page
         return $ids;
     }
 
-    public function Content() 
+    public function Content()
     {
         if (!$this->ID) {
             return '';

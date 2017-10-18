@@ -24,7 +24,7 @@ class SortableChildrenExtension extends DataExtension
      *
      * @return DataObjectSet
      */
-    public function FilteredChildren($filter = '', $sort = '"Sort" ASC') 
+    public function FilteredChildren($filter = '', $sort = '"Sort" ASC')
     {
         if ($filter == "null") {
             $filter = '';
@@ -52,7 +52,7 @@ class SortableChildrenExtension extends DataExtension
      *   (only applicable when extension is applied to {@link SiteTree}).
      * @return DataObjectSet
      */
-    public function filteredStageChildren($showAll = false, $filter = '', $sort = '"Sort" ASC') 
+    public function filteredStageChildren($showAll = false, $filter = '', $sort = '"Sort" ASC')
     {
         $extraFilter = $filter;
         if($this->owner->db('ShowInMenus')) {

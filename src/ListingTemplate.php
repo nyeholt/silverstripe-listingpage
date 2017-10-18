@@ -24,7 +24,7 @@ class ListingTemplate extends DataObject
         'ItemTemplate'      => "\t<% loop \$Items %>\n\t\t<p>\$Title</p>\n\t<% end_loop %>",
     );
 
-    public function getCMSFields() 
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
         $fields->replaceField('ItemTemplate', $ta = new TextareaField('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));

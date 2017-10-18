@@ -13,29 +13,13 @@ use Symbiote\ListingPage\ListingTemplate;
  */
 class ListingAdmin extends ModelAdmin
 {
-    /**
-     * @config
-     * @var string
-     */
-    private static $url_segment = 'listing';
-
-    /**
-     * @config
-     * @var string
-     */
     private static $menu_title = 'Listings';
 
-    /**
-     * @config
-     * @var array
-     */
+    private static $url_segment = 'listing';
+
     private static $managed_models = array(
         ListingTemplate::class
     );
 
-    /**
-     * @config
-     * @var string
-     */
     private static $menu_icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
 }
