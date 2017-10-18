@@ -8,10 +8,11 @@ use Symbiote\ListingPage\ListingTemplate;
 /**
  * Description of ListingAdmin
  *
- * @author marcus@silverstripe.com.au
+ * @author  marcus@silverstripe.com.au
  * @license BSD License http://silverstripe.org/bsd-license/
  */
-class ListingAdmin extends ModelAdmin {
+class ListingAdmin extends ModelAdmin
+{
     private static $url_segment = 'listing';
 
     private static $menu_title = 'Listings';
