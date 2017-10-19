@@ -1,9 +1,9 @@
 <?php
 
 namespace Symbiote\ListingPage;
+
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\TextareaField;
-
 
 /**
  * Description of ListingTemplate
