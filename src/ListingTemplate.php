@@ -21,13 +21,13 @@ class ListingTemplate extends DataObject
     );
 
     private static $defaults = array(
-        'ItemTemplate'      => "\t<% loop \$Items %>\n\t\t<p>\$Title</p>\n\t<% end_loop %>",
+        'ItemTemplate'      => "<% loop \$Items %>\n\t<p>\$Title</p>\n<% end_loop %>",
     );
 
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields->replaceField('ItemTemplate', $ta = new TextareaField('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));
+        $fields->replaceField('ItemTemplate', $ta = TextareaField::create('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));
         $ta->setRows(20);
         $ta->setColumns(120);
         return $fields;
