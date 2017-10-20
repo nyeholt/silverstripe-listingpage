@@ -1,5 +1,10 @@
 <?php
 
+namespace Symbiote\ListingPage;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\TextareaField;
+
 /**
  * Description of ListingTemplate
  *
@@ -8,19 +13,21 @@
  */
 class ListingTemplate extends DataObject
 {
-    public static $db = array(
-    'Title'                => 'Varchar(127)',
-    'ItemTemplate'        => 'Text',
-    );
-    
-    public static $defaults = array(
-    'ItemTemplate'        => "\t<% loop \$Items %>\n\t\t<p>\$Title</p>\n\t<% end_loop %>",
+    private static $table_name = 'ListingTemplate';
+
+    private static $db = array(
+        'Title'             => 'Varchar(127)',
+        'ItemTemplate'      => 'Text',
     );
 
-    public function getCMSFields() 
+    private static $defaults = array(
+        'ItemTemplate'      => "<% loop \$Items %>\n\t<p>\$Title</p>\n<% end_loop %>",
+    );
+
+    public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $fields->replaceField('ItemTemplate', $ta = new TextareaField('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));
+        $fields->replaceField('ItemTemplate', $ta = TextareaField::create('ItemTemplate', _t('ListingTemplate.ITEM_TEMPLATE', 'Item Template (use the Items variable to iterate over)')));
         $ta->setRows(20);
         $ta->setColumns(120);
         return $fields;
