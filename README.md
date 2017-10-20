@@ -1,5 +1,7 @@
 # Listing Page Module
 
+[![Build Status](https://travis-ci.org/nyeholt/silverstripe-listingpage.svg?branch=master)](https://travis-ci.org/nyeholt/silverstripe-listingpage)
+
 A module that allows CMS users to create templated listing pages.
 
 ## Composer Install
