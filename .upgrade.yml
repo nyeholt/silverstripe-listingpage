@@ -1,0 +1,6 @@
+mappings:
+  ListingTemplate: Symbiote\ListingPage\ListingTemplate
+  ListingAdmin: Symbiote\ListingPage\ListingAdmin
+  SortableChildrenExtension: Symbiote\ListingPage\SortableChildrenExtension
+  ListingPage: Symbiote\ListingPage\ListingPage
+  ListingPage_Controller: Symbiote\ListingPage\ListingPageController
