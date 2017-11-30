@@ -13,7 +13,7 @@ use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FormField;
 use Symbiote\MultiValueField\Fields\KeyValueField;
-use Symbiote\MultiValueField\Fields\MultiValueField;
+use Symbiote\MultiValueField\ORM\FieldType\MultiValueField;
 use SilverStripe\Control\Controller;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataList;
