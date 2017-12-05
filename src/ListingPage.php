@@ -324,7 +324,8 @@ class ListingPage extends Page
                 $parentClass = ClassInfo::shortName($tagComponent['parentClass']);
                 $items = $items->innerJoin(
                     $tagComponent['join'],
-                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = ".(int)$tag->ID);
+                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = ".(int)$tag->ID
+                );
             } else {
                 $tags = new ArrayList();
             }
