@@ -48,7 +48,7 @@ class ListingPage extends Page
 
         'ComponentFilterName'       => 'Varchar(64)',
         'ComponentFilterColumn'     => 'Varchar(64)',
-        'ComponentFilterWhere'      => MultiValueField::class,
+        'ComponentFilterWhere'      => MultiValueField::class
     );
 
     private static $has_one = array(
@@ -96,7 +96,6 @@ class ListingPage extends Page
 
         $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
         // $fields->addFieldToTab('Root.Content.Main', TextField::create('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
-
 
         $types = ClassInfo::subclassesFor(DataObject::class);
         array_shift($types);
@@ -296,18 +295,14 @@ class ListingPage extends Page
             $page = isset($_REQUEST[$pageUrlVar]) ? (int) $_REQUEST[$pageUrlVar] : 0;
             $items  = $items->limit($this->PerPage, $page);
         }
-
-
         if ($this->ComponentFilterName) {
             $controller = (Controller::has_curr()) ? Controller::curr() : null;
             $tags = array();
-            if ($controller && $controller instanceof ListingPage_Controller) {
+            if ($controller && $controller instanceof ListingPageController) {
                 $tagName = $controller->getRequest()->latestParam('Action');
-
                 if ($tagName) {
                     $tags = $this->ComponentListingItems();
                     $tags = $tags->filter(array($this->ComponentFilterColumn => $tagName));
-
                     $tags = $tags->toArray();
                     if (!$tags) {
                         // Workaround cms/#1045
@@ -325,9 +320,12 @@ class ListingPage extends Page
                     return $controller->httpError(500, 'ComponentFilterColumn provided is not unique. '.count($tags).' matches found in query.');
                 }
                 $tag = reset($tags);
-
-                list($parentClass, $componentClass, $pageIDColumnName, $tagIDColumnName, $tagManyManyTable) = singleton($this->ListType)->manyManyComponent($this->ComponentFilterName);
-                $items = $items->innerJoin($tagManyManyTable, "\"{$pageIDColumnName}\" = \"$parentClass\".\"ID\" AND \"{$tagIDColumnName}\" = ".(int)$tag->ID);
+                $tagComponent = DataObject::getSchema()->manyManyComponent($this->ListType, $this->ComponentFilterName);
+                $parentClass = ClassInfo::shortName($tagComponent['parentClass']);
+                $items = $items->innerJoin(
+                    $tagComponent['join'],
+                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = ".(int)$tag->ID
+                );
             } else {
                 $tags = new ArrayList();
             }
