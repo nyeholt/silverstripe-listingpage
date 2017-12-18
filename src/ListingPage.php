@@ -40,7 +40,6 @@ class ListingPage extends Page
         'ListType'                  => 'DBClassName(\'' . DataObject::class . '\', [\'index\' => false])',
         'ListingSourceID'           => 'Int',
         'Depth'                     => 'Int',
-        'ClearSource'               => 'Boolean',
         'StrictType'                => 'Boolean',
 
         'ContentType'               => 'Varchar',
@@ -111,7 +110,6 @@ class ListingPage extends Page
         if ($sourceType && $parentType) {
             $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
             $fields->addFieldToTab('Root.ListingSettings', TreeDropdownField::create('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $parentType));
-            $fields->addFieldToTab('Root.ListingSettings', CheckboxField::create('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
         }
 
         $contentTypes = array(
@@ -194,10 +192,6 @@ class ListingPage extends Page
         parent::onBeforeWrite();
         if (!$this->ID) {
             $this->Content = '$Listing';
-        }
-        if ($this->ClearSource) {
-            $this->ClearSource = false;
-            $this->ListingSourceID = 0;
         }
     }
 
