@@ -40,8 +40,9 @@ class ListingPage extends Page
         'ListType'                  => 'DBClassName(\'' . DataObject::class . '\', [\'index\' => false])',
         'ListingSourceID'           => 'Int',
         'Depth'                     => 'Int',
-        'ClearSource'               => 'Boolean',
         'StrictType'                => 'Boolean',
+
+        'AllowDrilldown'              => 'Boolean',
 
         'ContentType'               => 'Varchar',
         'CustomContentType'         => 'Varchar',
@@ -111,7 +112,8 @@ class ListingPage extends Page
         if ($sourceType && $parentType) {
             $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('Depth', _t('ListingPage.DEPTH', 'Depth'), array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5)));
             $fields->addFieldToTab('Root.ListingSettings', TreeDropdownField::create('ListingSourceID', _t('ListingPage.LISTING_SOURCE', 'Source of content for listing'), $parentType));
-            $fields->addFieldToTab('Root.ListingSettings', CheckboxField::create('ClearSource', _t('ListingPage.CLEAR_SOURCE', 'Clear listing source value')));
+
+            $fields->addFieldToTab('Root.ListingSettings', CheckboxField::create('AllowDrilldown', _t('ListingPage.ALLOW_DRILLDOWN', 'Allow request action to provide substitute parent ID, eg /page-url/43')));
         }
 
         $contentTypes = array(
@@ -195,10 +197,6 @@ class ListingPage extends Page
         if (!$this->ID) {
             $this->Content = '$Listing';
         }
-        if ($this->ClearSource) {
-            $this->ClearSource = false;
-            $this->ListingSourceID = 0;
-        }
     }
 
     /**
@@ -210,7 +208,41 @@ class ListingPage extends Page
     {
         $sourceType = $this->effectiveSourceType();
         if ($sourceType && $this->ListingSourceID) {
-            return DataObject::get_by_id($sourceType, $this->ListingSourceID);
+            $parentId = $this->ListingSourceID;
+            $source = DataList::create($sourceType)->byID($parentId);
+
+            $newParent = null;
+
+            $newParentId = 0;
+            if ($this->AllowDrilldown) {
+                $newParentId = Controller::has_curr() ? (int) Controller::curr()->getRequest()->param('Action') : 0;
+            }
+
+            if ($newParentId) {
+                /* @var $source DataObject */
+                if ($source) {
+                    $newParent = $sourceType::get()->byId($newParentId);
+                    if ($newParent) {
+                        // figure out whether it's within the source already configured there by looking up through the
+                        // tree until we find the listing source ID parent, at which point we can
+                        // safely swap to it
+                        //
+                        // - nyeholt 2017-12-18
+                        $parentCheck = $newParent;
+                        while ($parentCheck) {
+                            if ($parentCheck->ID == $source->ID) {
+                                $source = $newParent;
+                                break;
+                            }
+                            $parentCheck = $parentCheck->Parent();
+                        }
+                    }
+                }
+            }
+
+            if ($source && $source->canView()) {
+                return $source;
+            }
         }
     }
 
@@ -270,7 +302,7 @@ class ListingPage extends Page
             $ids[] = $source->ID;
 
             if (isset($objFields['ParentID']) && count($ids)) {
-                $filter['ParentID:ExactMatch'] = $ids;
+                $filter['ParentID'] = $ids;
             }
         }
 
