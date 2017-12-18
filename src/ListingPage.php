@@ -210,7 +210,10 @@ class ListingPage extends Page
     {
         $sourceType = $this->effectiveSourceType();
         if ($sourceType && $this->ListingSourceID) {
-            return DataObject::get_by_id($sourceType, $this->ListingSourceID);
+            $source = DataList::create($sourceType)->byID($this->ListingSourceID);
+            if ($source && $source->canView()) {
+                return $source;
+            }
         }
     }
 
