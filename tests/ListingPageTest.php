@@ -12,7 +12,7 @@ class ListingPageTest extends SapphireTest
 {
 
     /**
-     * The elemental extension may be applied, meaning we need to ensure this is loaded. 
+     * The elemental extension may be applied, meaning we need to ensure this is loaded.
      *
      * @return array
      */
@@ -40,8 +40,10 @@ class ListingPageTest extends SapphireTest
         $record->write();
 
         $this->assertTrue($record->publishRecursive());
-        $this->assertEquals('Listing Page Test',
-            DB::query("SELECT \"Title\" FROM \"SiteTree_Live\" WHERE \"ID\" = '$record->ID'")->value());
+        $this->assertEquals(
+            'Listing Page Test',
+            DB::query("SELECT \"Title\" FROM \"SiteTree_Live\" WHERE \"ID\" = '$record->ID'")->value()
+        );
     }
 
     public function testCustomisedSort()
@@ -76,7 +78,7 @@ class ListingPageTest extends SapphireTest
             'sort_dir' => 'DESC',
         ];
 
-        $req = new \SilverStripe\Control\HTTPRequest('GET', 'dummy/url', $params);
+        $req   = new \SilverStripe\Control\HTTPRequest('GET', 'dummy/url', $params);
         $req->setSession(\SilverStripe\Control\Controller::curr()->getRequest()->getSession());
         $controller->setRequest($req);
         $controller->pushCurrent();
