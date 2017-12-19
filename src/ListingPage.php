@@ -316,14 +316,12 @@ class ListingPage extends Page
         $sort = $this->SortBy && isset($objFields[$this->SortBy]) ? $this->SortBy : 'Title';
         $req = Controller::has_curr() ? Controller::curr()->getRequest() : null;
 
-        if (strlen($this->CustomSort)) {
-            if ($req) {
-                $sortField = $req->getVar($this->CustomSort);
-                if ($sortField) {
-                    $sort = isset($objFields[$sortField]) ? $sortField : $sort;
-                    $sortDir = $req->getVar($this->CustomSort.'_dir');
-                    $sortDir = $sortDir === 'asc' ? 'ASC' : 'DESC';
-                }
+        if (strlen($this->CustomSort) && $req) {
+            $sortField = $req->getVar($this->CustomSort);
+            if ($sortField) {
+                $sort = isset($objFields[$sortField]) ? $sortField : $sort;
+                $sortDir = $req->getVar($this->CustomSort.'_dir');
+                $sortDir = $sortDir === 'asc' ? 'ASC' : 'DESC';
             }
         }
 
