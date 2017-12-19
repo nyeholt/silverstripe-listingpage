@@ -19,4 +19,18 @@ class ListingPageTest extends SapphireTest
         $this->assertTrue($record->publish());
         $this->assertEquals('Listing Page Test', DB::query("SELECT \"Title\" FROM \"SiteTree_Live\" WHERE \"ID\" = '$obj->ID'")->value());
     }
+
+    public function testCustomisedSort() {
+        $this->logInWithPermission('ADMIN');
+
+        $record = ListingPage::create();
+        $record->Title = "Listing Page sort test";
+        $record->write();
+
+        $record->ListingSourceID = $record->ID;
+        $record->CustomSort = 'src';
+
+        $items = $record->ListingItems();
+
+    }
 }
