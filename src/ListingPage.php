@@ -96,7 +96,9 @@ class ListingPage extends Page
         $objFields = $this->getSelectableFields($listType);
 
         $fields->addFieldToTab('Root.ListingSettings', DropdownField::create('SortBy', _t('ListingPage.SORT_BY', 'Sort By'), $objFields));
-        // $fields->addFieldToTab('Root.Content.Main', TextField::create('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort field')));
+        $fields->addFieldToTab('Root.ListingSettings', $custSort = TextField::create('CustomSort', _t('ListingPage.CUSTOM_SORT', 'Custom sort GET parameter name')));
+
+        $custSort->setRightTitle('If set, add this as a URL param to sort the view. Will also look for {name}_dir as the sort direction');
 
         $types = ClassInfo::subclassesFor(DataObject::class);
         array_shift($types);
@@ -306,14 +308,32 @@ class ListingPage extends Page
             }
         }
 
-
         if ($this->StrictType) {
             $filter['ClassName'] = $listType;
         }
 
-
         $sortDir = $this->SortDir == 'Ascending' ? 'ASC' : 'DESC';
         $sort = $this->SortBy && isset($objFields[$this->SortBy]) ? $this->SortBy : 'Title';
+        $req = Controller::has_curr() ? Controller::curr()->getRequest() : null;
+
+        if (strlen($this->CustomSort) && $req) {
+            $sortField = $req->getVar($this->CustomSort);
+            if ($sortField) {
+                $sort = isset($objFields[$sortField]) ? $sortField : $sort;
+                $sortDir = $req->getVar($this->CustomSort.'_dir');
+                $sortDir = $sortDir === 'asc' ? 'ASC' : 'DESC';
+            }
+        }
+
+        // Bind these variables into the current page object because the
+        // template may want to read them out after.
+        //
+        // - nyeholt 2017-12-19
+        $this->CurrentSort = $sort;
+        $this->CurrentDir = $sortDir;
+        $this->CurrentSource = $source;
+        $this->CurrentLink = $req ? $req->getURL() : $this->Link();
+
         // $sort = $this->CustomSort ? $this->CustomSort : $sort;
         $sort .= ' ' . $sortDir;
 
