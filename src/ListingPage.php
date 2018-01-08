@@ -135,8 +135,14 @@ class ListingPage extends Page
                 $componentsManyMany = array();
             }
             $componentNames = array();
-            foreach ($componentsManyMany as $componentName => $className) {
-                $componentNames[$componentName] = FormField::name_to_label($componentName) . ' ('.$className.')';
+            foreach ($componentsManyMany as $componentName => $componentVal) {
+                $componentClass = '';
+                if (is_string($componentVal)) {
+                    $componentClass = " ($componentVal)";
+                } elseif (is_array($componentVal) && isset($componentVal['through'])) {
+                    $componentClass = " ({$componentVal['through']})";
+                }
+                $componentNames[$componentName] = FormField::name_to_label($componentName) . $componentClass;
             }
             $fields->addFieldToTab(
                 'Root.ListingSettings',
