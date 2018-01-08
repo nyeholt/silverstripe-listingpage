@@ -139,8 +139,7 @@ class ListingPage extends Page
                 $componentClass = '';
                 if (is_string($componentVal)) {
                     $componentClass = " ($componentVal)";
-                }
-                elseif (is_array($componentVal) && isset($componentVal['through'])) {
+                } elseif (is_array($componentVal) && isset($componentVal['through'])) {
                     $componentClass = " ({$componentVal['through']})";
                 }
                 $componentNames[$componentName] = FormField::name_to_label($componentName) . $componentClass;
