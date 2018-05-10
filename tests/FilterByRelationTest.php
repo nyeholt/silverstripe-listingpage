@@ -24,7 +24,7 @@ class FilterByRelationTest extends FunctionalTest
      *
      * Make sure there's a page or file that should be listed has the 'Administrators' group as a viewers group.
      * Assuming other fields are valid, visit the page, with /administrators as the last part of the URL.
-     * 
+     *
      * Source:
      * https://github.com/nyeholt/silverstripe-listingpage/issues/19
      *
@@ -78,9 +78,9 @@ HTML;
         $record->publishRecursive();
 
         $response = $this->get('listingpage-relation-test');
-        $this->assertEquals('200',$response->getStatusCode(), 'Expected "listingpage-relation-test" to get 200 OK');
-        $response = $this->get('listingpage-relation-test/'.$adminGroups[0]->Code, 'Expected "listingpage-relation-test/'.$adminGroups[0]->Code.'" to get 200 OK');
-        $this->assertEquals('200',$response->getStatusCode());
+        $this->assertEquals('200', $response->getStatusCode(), 'Expected "listingpage-relation-test" to get 200 OK');
+        $response = $this->get('listingpage-relation-test/' . $adminGroups[0]->Code, 'Expected "listingpage-relation-test/' . $adminGroups[0]->Code . '" to get 200 OK');
+        $this->assertEquals('200', $response->getStatusCode());
         $expectedValue = <<<HTML
 <div class="listing-page-template">
     <h1>Filter By Relation Test Page</h1>

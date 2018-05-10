@@ -18,6 +18,9 @@
       "email": "marcus@symbiote.com.au"
     }
   ],
+  "scripts": {
+    "phpcbf": "phpcbf --standard=../../../vendor/silverstripe/framework/phpcs.xml.dist src/ tests/"
+  },
   "require": {
     "silverstripe/framework": "~4.0",
     "symbiote/silverstripe-multivaluefield": "~5.0"
