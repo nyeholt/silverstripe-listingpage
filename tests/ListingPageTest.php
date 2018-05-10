@@ -3,14 +3,17 @@
 namespace Symbiote\ListingPage\Tests;
 
 use Page;
+use DNADesign\Elemental\Tests\Src\TestPage;
+use Symbiote\Multisites\Multisites;
 use Symbiote\ListingPage\ListingPage;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\Controller;
 use SilverStripe\ORM\DB;
 
 class ListingPageTest extends SapphireTest
 {
-
     /**
      * The elemental extension may be applied, meaning we need to ensure this is loaded.
      *
@@ -19,8 +22,8 @@ class ListingPageTest extends SapphireTest
     public static function getExtraDataObjects()
     {
         $objects = static::$extra_dataobjects;
-        if (class_exists('\DNADesign\Elemental\Tests\Src\TestPage')) {
-            $objects[] = '\DNADesign\Elemental\Tests\Src\TestPage';
+        if (class_exists(TestPage::class)) {
+            $objects[] = TestPage::class;
         }
         return $objects;
     }
@@ -30,8 +33,8 @@ class ListingPageTest extends SapphireTest
         $this->logInWithPermission('ADMIN');
 
         $parentId = 0;
-        if (class_exists('\Symbiote\Multisites\Multisites')) {
-            $parentId = \Symbiote\Multisites\Multisites::inst()->getCurrentSiteId();
+        if (class_exists(Multisites::class)) {
+            $parentId = Multisites::inst()->getCurrentSiteId();
         }
 
         $record           = ListingPage::create();
@@ -51,8 +54,8 @@ class ListingPageTest extends SapphireTest
         $this->logInWithPermission('ADMIN');
 
         $parentId = 0;
-        if (class_exists('\Symbiote\Multisites\Multisites')) {
-            $parentId = \Symbiote\Multisites\Multisites::inst()->getCurrentSiteId();
+        if (class_exists(Multisites::class)) {
+            $parentId = Multisites::inst()->getCurrentSiteId();
         }
 
         $record           = ListingPage::create();
@@ -71,15 +74,15 @@ class ListingPageTest extends SapphireTest
         $this->assertEquals('Title', $record->CurrentSort);
         $this->assertEquals('ASC', $record->CurrentDir);
 
-        $controller = new \SilverStripe\Control\Controller;
+        $controller = new Controller;
 
         $params = [
             'sort' => 'ID',
             'sort_dir' => 'DESC',
         ];
 
-        $req   = new \SilverStripe\Control\HTTPRequest('GET', 'dummy/url', $params);
-        $req->setSession(\SilverStripe\Control\Controller::curr()->getRequest()->getSession());
+        $req   = new HTTPRequest('GET', 'dummy/url', $params);
+        $req->setSession(Controller::curr()->getRequest()->getSession());
         $controller->setRequest($req);
         $controller->pushCurrent();
         $items = $record->ListingItems();

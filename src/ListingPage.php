@@ -148,7 +148,7 @@ class ListingPage extends Page
                 'Root.ListingSettings',
                 DropdownField::create('ComponentFilterName', _t('ListingPage.RELATION_COMPONENT_NAME', 'Filter by Relation'), $componentNames)
                 ->setEmptyString('(Select)')
-                ->setDescription('Will cause this page to list items based on the last URL part. (ie. '.$this->AbsoluteLink().'{$componentFieldName})')
+                ->setDescription('Will cause this page to list items based on the last URL part. (ie. ' . $this->AbsoluteLink() . '{$componentFieldName})')
             );
             $fields->addFieldToTab('Root.ListingSettings', $componentColumnField = DropdownField::create('ComponentFilterColumn', 'Filter by Relation Field')->setEmptyString('(Must select a relation and save)'));
             $fields->addFieldToTab('Root.ListingSettings', $componentListingField = DropdownField::create('ComponentListingTemplateID', _t('ListingPage.COMPONENT_CONTENT_TEMPLATE', 'Relation Listing Template'))->setEmptyString('(Must select a relation and save)'));
@@ -326,7 +326,7 @@ class ListingPage extends Page
             $sortField = $req->getVar($this->CustomSort);
             if ($sortField) {
                 $sort = isset($objFields[$sortField]) ? $sortField : $sort;
-                $sortDir = $req->getVar($this->CustomSort.'_dir');
+                $sortDir = $req->getVar($this->CustomSort . '_dir');
                 $sortDir = $sortDir === 'asc' ? 'ASC' : 'DESC';
             }
         }
@@ -375,14 +375,14 @@ class ListingPage extends Page
 
             if ($tags) {
                 if (count($tags) > 1) {
-                    return $controller->httpError(500, 'ComponentFilterColumn provided is not unique. '.count($tags).' matches found in query.');
+                    return $controller->httpError(500, 'ComponentFilterColumn provided is not unique. ' . count($tags) . ' matches found in query.');
                 }
                 $tag = reset($tags);
                 $tagComponent = DataObject::getSchema()->manyManyComponent($this->ListType, $this->ComponentFilterName);
                 $parentClass = ClassInfo::shortName($tagComponent['parentClass']);
                 $items = $items->innerJoin(
                     $tagComponent['join'],
-                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = ".(int)$tag->ID
+                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = " . (int)$tag->ID
                 );
             } else {
                 $tags = new ArrayList();
