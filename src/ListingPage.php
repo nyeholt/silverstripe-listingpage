@@ -356,11 +356,11 @@ class ListingPage extends Page
             $controller = (Controller::has_curr()) ? Controller::curr() : null;
             $tags = array();
             if ($controller && $controller instanceof ListingPageController) {
-                $tagName = $controller->getRequest()->latestParam('Action');
+                $tagName = urldecode($controller->getRequest()->latestParam('Action'));
                 if ($tagName) {
                     $tags = $this->ComponentListingItems();
                     $tags = $tags->filter(array($this->ComponentFilterColumn => $tagName));
-                    $tags = $tags->toArray();
+                    $tags = $tags->column();
                     if (!$tags) {
                         // Workaround cms/#1045
                         // - Stop infinite redirect
@@ -373,16 +373,9 @@ class ListingPage extends Page
             }
 
             if ($tags) {
-                if (count($tags) > 1) {
-                    return $controller->httpError(500, 'ComponentFilterColumn provided is not unique. ' . count($tags) . ' matches found in query.');
-                }
-                $tag = reset($tags);
-                $tagComponent = DataObject::getSchema()->manyManyComponent($this->ListType, $this->ComponentFilterName);
-                $parentClass = ClassInfo::shortName($tagComponent['parentClass']);
-                $items = $items->innerJoin(
-                    $tagComponent['join'],
-                    "\"{$tagComponent['parentField']}\" = \"$parentClass\".\"ID\" AND \"{$tagComponent['childField']}\" = " . (int)$tag->ID
-                );
+                $items = $items->filter([
+                    $this->ComponentFilterName . '.ID' => $tags
+                ]);
             } else {
                 $tags = new ArrayList();
             }
