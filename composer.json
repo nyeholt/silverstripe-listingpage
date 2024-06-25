@@ -22,11 +22,11 @@
     "phpcbf": "phpcbf --standard=../../../vendor/silverstripe/framework/phpcs.xml.dist src/ tests/"
   },
   "require": {
-    "silverstripe/framework": "~4.0",
-    "symbiote/silverstripe-multivaluefield": "~5.0"
+    "silverstripe/framework": "^4 || ^5",
+    "symbiote/silverstripe-multivaluefield": "^5 || ^6"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "^3.0"
+    "squizlabs/php_codesniffer": "^3"
   },
   "autoload": {
     "psr-4": {
@@ -37,10 +37,7 @@
   "extra": {
     "branch-alias": {
       "dev-master": "2.3.x-dev"
-    },
-    "expose": [
-      "client/images"
-    ]
+    }
   },
   "prefer-stable": true,
   "minimum-stability": "dev"

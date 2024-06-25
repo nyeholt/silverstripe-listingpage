@@ -7,9 +7,9 @@ use SilverStripe\Control\HTTPRequest;
 
 class ListingPageController extends PageController
 {
-    private static $url_handlers = array(
+    private static $url_handlers = [
         '$Action' => 'index'
-    );
+    ];
 
     public function index(HTTPRequest $request)
     {
@@ -23,11 +23,11 @@ class ListingPageController extends PageController
         if ($this->data()->ContentType ||
             $this->data()->CustomContentType) {
             // k, not doing it in the theme...
-            $contentType = $this->data()->ContentType ? $this->data()->ContentType : $this->data()->CustomContentType;
+            $contentType = $this->data()->ContentType ?: $this->data()->CustomContentType;
             $this->response->addHeader('Content-type', $contentType);
 
             return $this->data()->Content();
         }
-        return array();
+        return [];
     }
 }

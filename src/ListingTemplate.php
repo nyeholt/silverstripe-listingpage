@@ -15,14 +15,14 @@ class ListingTemplate extends DataObject
 {
     private static $table_name = 'ListingTemplate';
 
-    private static $db = array(
+    private static $db = [
         'Title'             => 'Varchar(127)',
         'ItemTemplate'      => 'Text',
-    );
+    ];
 
-    private static $defaults = array(
+    private static $defaults = [
         'ItemTemplate'      => "<% loop \$Items %>\n\t<p>\$Title</p>\n<% end_loop %>",
-    );
+    ];
 
     public function getCMSFields()
     {

@@ -7,12 +7,12 @@ A module that allows CMS users to create templated listing pages.
 ## Composer Install
 
 ```
-composer require symbiote/silverstripe-listingpage:~2.0.0
+composer require symbiote/silverstripe-listingpage: ^2.0
 ```
 
 ## Requirements
 
-* SilverStripe 4.0+
+* SilverStripe ^4 || ^5
 * MultiValueField
 
 ## Documentation
