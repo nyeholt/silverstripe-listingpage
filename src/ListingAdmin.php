@@ -17,9 +17,9 @@ class ListingAdmin extends ModelAdmin
 
     private static $url_segment = 'listing';
 
-    private static $managed_models = array(
+    private static $managed_models = [
         ListingTemplate::class
-    );
+    ];
 
-    private static $menu_icon = 'symbiote/silverstripe-listingpage: client/images/listingpage.png';
+    private static $menu_icon_class = 'font-icon-p-list';
 }

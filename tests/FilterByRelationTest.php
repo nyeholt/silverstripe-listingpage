@@ -51,7 +51,7 @@ class FilterByRelationTest extends FunctionalTest
 </div>
 SSTEMPLATE;
         $templateRecord->write();
-        
+
         $adminGroups = Permission::get_groups_by_permission('ADMIN')->toArray();
         $this->assertCount(1, $adminGroups, 'Expected 1 admin group');
 
